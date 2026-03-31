@@ -1,6 +1,6 @@
 # netlify.toml
 [build]
   # The command that builds your project
-  command = "dx build --release"
+  command = "dx bundle --release"
   # The directory to publish (upload) to Netlify
-  publish = "target/dx/hot-near-kit-bindings/release/web/public"
+  publish = "target/dx/stickyexplorer/release/web/public"
