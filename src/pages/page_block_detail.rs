@@ -11,35 +11,55 @@ use crate::logic::network::NetworkId;
 // =========================================
 
 #[derive(Clone, Serialize)]
+#[serde(untagged)]
+enum BlockIdParam {
+    Height(u64),
+    Hash(String),
+}
+
+#[derive(Clone, Serialize)]
 struct BlockParams {
-    block_id: String,
+    block_id: BlockIdParam,
     #[serde(skip_serializing_if = "Option::is_none")]
     with_transactions: Option<bool>,
 }
 
 #[component]
 pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
+    let api_base = network.api_base_url();
+    
+    // State
     let mut block = use_signal(|| Option::<BlockDetailResponse>::None);
     let mut loading = use_signal(|| true);
     let mut error = use_signal(|| Option::<String>::None);
     let mut visible_count = use_signal(|| 40usize);
-
-    let api_base = network.api_base_url();
-
-    use_effect(move || {
+    
+    // Track current block_id to detect changes
+    let mut current_block_id = use_signal(|| String::new());
+    
+    // Fetch data when block_id changes
+    if current_block_id() != block_id {
+        current_block_id.set(block_id.clone());
+        loading.set(true);
+        error.set(None);
+        visible_count.set(40);
+        block.set(None);
+        
         let api_base = api_base.to_string();
         let block_id = block_id.clone();
+        
         spawn(async move {
-            loading.set(true);
-            error.set(None);
-
             let client = Client::new();
 
             // Determine if block_id is a number (height) or string (hash)
-            let block_id_str = block_id.clone();
+            let block_id_param = if let Ok(height) = block_id.parse::<u64>() {
+                BlockIdParam::Height(height)
+            } else {
+                BlockIdParam::Hash(block_id.clone())
+            };
 
             let params = BlockParams {
-                block_id: block_id_str,
+                block_id: block_id_param,
                 with_transactions: Some(true),
             };
 
@@ -66,7 +86,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
             }
             loading.set(false);
         });
-    });
+    }
 
     let load_more = move |_| {
         visible_count.set(visible_count() + 40);

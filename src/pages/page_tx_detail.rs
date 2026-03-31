@@ -19,21 +19,30 @@ struct TxParams {
 
 #[component]
 pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
+    let api_base = network.api_base_url();
+    let network_val = network;
+    
+    // State
     let mut tx = use_signal(|| Option::<TransactionDetail>::None);
     let mut parsed_tx = use_signal(|| Option::<ParsedTx>::None);
     let mut loading = use_signal(|| true);
     let mut error = use_signal(|| Option::<String>::None);
-
-    let api_base = network.api_base_url();
-    let network_val = network;
-
-    use_effect(move || {
+    
+    // Track current tx_hash to detect changes
+    let mut current_tx_hash = use_signal(|| String::new());
+    
+    // Fetch data when tx_hash changes
+    if current_tx_hash() != tx_hash {
+        current_tx_hash.set(tx_hash.clone());
+        loading.set(true);
+        error.set(None);
+        tx.set(None);
+        parsed_tx.set(None);
+        
         let api_base = api_base.to_string();
         let tx_hash = tx_hash.clone();
+        
         spawn(async move {
-            loading.set(true);
-            error.set(None);
-            
             let client = Client::new();
             let params = TxParams {
                 tx_hashes: vec![tx_hash],
@@ -51,7 +60,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                             if let Some(first_tx) = transactions.first() {
                                 if let Ok(tx_detail) = serde_json::from_value::<TransactionDetail>(first_tx.clone()) {
                                     let parsed = parse_transaction(&tx_detail);
-                                    parsed_tx.set(Some(parsed));
+                                    parsed_tx.set(Some(parsed.clone()));
                                     tx.set(Some(tx_detail));
                                 }
                             } else {
@@ -66,7 +75,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
             }
             loading.set(false);
         });
-    });
+    }
 
     if let Some(err) = error() {
         return rsx! {
