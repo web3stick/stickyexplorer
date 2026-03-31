@@ -2,7 +2,9 @@
 
 rewriting "https://github.com/fastnear/explorer-frontend" in rust dioxus ui framework
 
-a few key differences we will support both mainnet and testnet on same domain we use /testnet/tx /testnet/account, and so on and /mainnet/tx /mainnet/account and so on
+a few key differences we will support both mainnet and testnet on same domain we use /testnet/tx /testnet/account, and so on and /mainnet/tx /mainnet/account and so on.
+see network.rs file and network button for how i want to implemnet network settings.
+would also be cool if for near accounts entered in the search bar if they end if .testnet auto switch to testnet, if they end in .near .tg or anything else auto switch to mainnet
 
 this is our color palette
 ```palette
