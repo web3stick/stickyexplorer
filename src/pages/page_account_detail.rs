@@ -34,18 +34,32 @@ struct TxParams {
 pub fn AccountDetail(account_id: String) -> Element {
     let network_id = get_stored_network_id();
     let api_base = network_id.api_base_url();
-    let account_id_for_resource = account_id.clone();
+    
+    // State
+    let mut txs = use_signal(|| Vec::<AccountTx>::new());
+    let mut parsed_txs = use_signal(|| Vec::<(String, ParsedTx)>::new());
+    let mut loading = use_signal(|| true);
+    let mut txs_count = use_signal(|| 0u64);
     
     // Global cache for faster navigation
     let tx_cache = use_signal(|| TxCache::new());
     
-    // Use resource for data fetching - automatically re-runs when account_id changes
-    let account_data = use_resource(move || {
+    // Track current account to detect changes
+    let mut current_account = use_signal(|| String::new());
+    
+    // Fetch data when account_id changes
+    if current_account() != account_id {
+        current_account.set(account_id.clone());
+        loading.set(true);
+        txs.set(Vec::new());
+        parsed_txs.set(Vec::new());
+        txs_count.set(0);
+        
         let api_base = api_base.to_string();
-        let account_id = account_id_for_resource.clone();
+        let account_id = account_id.clone();
         let mut tx_cache = tx_cache.clone();
         
-        async move {
+        spawn(async move {
             let client = Client::new();
             let filters = AccountFilters::default();
             let params = AccountParams {
@@ -69,47 +83,45 @@ pub fn AccountDetail(account_id: String) -> Element {
                                 .filter_map(|v| serde_json::from_value(v.clone()).ok())
                                 .collect();
                             
-                            let txs_count = data.get("txs_count").and_then(|v| v.as_u64()).unwrap_or(0);
+                            let count = data.get("txs_count").and_then(|v| v.as_u64()).unwrap_or(0);
                             
                             // Fetch full transaction details (with caching)
                             let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
                             let parsed = fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache).await;
                             
-                            return Some((new_txs, parsed, txs_count));
+                            txs.set(new_txs);
+                            parsed_txs.set(parsed);
+                            txs_count.set(count);
                         }
                     }
                 }
                 Err(_) => {}
             }
-            None
-        }
-    });
-
-    let account_id_display = account_id.clone();
+            loading.set(false);
+        });
+    }
     
-    // Read the resource state
-    let data = account_data.read();
+    // Read state
+    let loading_val = loading();
+    let txs_list = txs();
+    let parsed_list = parsed_txs();
+    let txs_count_val = txs_count();
+    let txs_list_empty = txs_list.is_empty();
     
-    if data.is_none() || data.as_ref().unwrap().is_none() {
+    if loading_val {
         return rsx! {
-            div { class: "empty-state", "Loading account..." }
+            div { class: "empty-state", "Loading {account_id}..." }
         };
     }
     
-    let inner_data = data.as_ref().unwrap().as_ref().unwrap();
-    let txs = &inner_data.0;
-    let parsed_list = &inner_data.1;
-    let txs_count = inner_data.2;
-    
-    let parsed_map: std::collections::HashMap<String, ParsedTx> = parsed_list.iter().cloned().collect();
-    let txs_list_empty = txs.is_empty();
-    let txs_count_val = txs_count;
+    let parsed_map: std::collections::HashMap<String, ParsedTx> = parsed_list.into_iter().collect();
+    let txs_list_for_display = txs_list.clone();
 
     rsx! {
         div {
             h1 { class: "mb-4 text-xl font-bold",
                 "Account: "
-                span { class: "font-mono text-base", "{account_id_display}" }
+                span { class: "font-mono text-base", "{account_id}" }
             }
 
             if txs_count_val > 0 {
@@ -132,7 +144,7 @@ pub fn AccountDetail(account_id: String) -> Element {
                         }
                     }
                     tbody {
-                        for atx in txs.iter() {
+                        for atx in txs_list_for_display.iter() {
                             if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
                                 tr {
                                     td {
@@ -180,7 +192,7 @@ pub fn AccountDetail(account_id: String) -> Element {
 
             // Mobile cards
             div { class: "mobile-cards",
-                for atx in txs.iter() {
+                for atx in txs_list_for_display.iter() {
                     if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
                         div {
                             div { class: "flex items-center justify-between gap-2 mb-1",
