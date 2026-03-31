@@ -204,3 +204,26 @@
     font-weight: 500;
     font-family: 'Courier New', Courier, monospace;
 }
+
+/* =========================================
+   JSON Container
+   ========================================= */
+.json-container {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 16px;
+    max-width: 100%;
+    overflow: auto;
+}
+
+.json-container pre {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}

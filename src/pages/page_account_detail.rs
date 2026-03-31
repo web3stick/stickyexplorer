@@ -8,6 +8,7 @@ use serde::Serialize;
 use crate::api::types::{AccountFilters, AccountTx};
 use crate::components::ui::{time_ago, transaction_hash};
 use crate::logic::network::get_stored_network_id;
+use crate::logic::tx_cache::TxCache;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 // =========================================
 
@@ -39,6 +40,9 @@ pub fn AccountDetail(account_id: String) -> Element {
     let mut has_more = use_signal(|| true);
     let mut loading_more = use_signal(|| false);
     let mut txs_count = use_signal(|| 0u64);
+    
+    // Global cache for faster navigation
+    let tx_cache = use_signal(|| TxCache::new());
 
     let network_id = get_stored_network_id();
     let api_base = network_id.api_base_url();
@@ -90,9 +94,9 @@ pub fn AccountDetail(account_id: String) -> Element {
                                 has_more.set(false);
                             }
                             
-                            // Fetch full transaction details
+                            // Fetch full transaction details (with caching)
                             let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
-                            let parsed = fetch_and_parse_transactions(&api_base, &hashes).await;
+                            let parsed = fetch_and_parse_transactions(&api_base, &hashes, tx_cache).await;
                             txs.set(new_txs);
                             parsed_txs.set(parsed);
                         }
@@ -147,9 +151,9 @@ pub fn AccountDetail(account_id: String) -> Element {
                             resume_token.set(Some(resume.to_string()));
                         }
                         
-                        // Fetch full transaction details for new txs
+                        // Fetch full transaction details for new txs (with caching)
                         let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
-                        let parsed = fetch_and_parse_transactions(&api_base, &hashes).await;
+                        let parsed = fetch_and_parse_transactions(&api_base, &hashes, tx_cache).await;
                         
                         txs.write().extend(new_txs);
                         parsed_txs.write().extend(parsed);
@@ -324,16 +328,32 @@ pub fn AccountDetail(account_id: String) -> Element {
     }
 }
 
-async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String]) -> Vec<(String, ParsedTx)> {
+async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], mut tx_cache: Signal<TxCache>) -> Vec<(String, ParsedTx)> {
     if hashes.is_empty() {
         return Vec::new();
     }
     
-    const BATCH_SIZE: usize = 20;
+    // First check cache for existing transactions
     let mut all_parsed = Vec::new();
+    let mut missing_hashes = Vec::new();
     
-    // Process in batches to avoid API limits
-    for chunk in hashes.chunks(BATCH_SIZE) {
+    for hash in hashes {
+        if let Some(parsed) = tx_cache.read().get(hash) {
+            all_parsed.push((hash.clone(), parsed.clone()));
+        } else {
+            missing_hashes.push(hash.clone());
+        }
+    }
+    
+    // If we have all in cache, return early
+    if missing_hashes.is_empty() {
+        return all_parsed;
+    }
+    
+    const BATCH_SIZE: usize = 20;
+    
+    // Process missing in batches to avoid API limits
+    for chunk in missing_hashes.chunks(BATCH_SIZE) {
         let client = Client::new();
         let params = TxParams {
             tx_hashes: chunk.to_vec(),
@@ -355,9 +375,12 @@ async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String]) -> Vec<
                             })
                             .map(|tx| {
                                 let parsed = parse_transaction(&tx);
-                                (parsed.hash.clone(), parsed)
+                                (parsed.hash.clone(), parsed.clone())
                             })
                             .collect();
+                        
+                        // Add to cache
+                        tx_cache.write().insert_batch(parsed.clone());
                         all_parsed.extend(parsed);
                     }
                 }
@@ -366,7 +389,7 @@ async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String]) -> Vec<
         }
         
         // Small delay between batches to avoid rate limiting
-        gloo_timers::future::TimeoutFuture::new(100).await;
+        gloo_timers::future::TimeoutFuture::new(50).await;
     }
     
     all_parsed

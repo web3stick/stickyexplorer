@@ -12,9 +12,11 @@ pub mod components {
     pub mod button_network;
     pub mod ui;
     pub mod search_bar;
+    pub mod widgets;
 }
 pub mod logic {
     pub mod network;
+    pub mod tx_cache;
 }
 pub mod utils;
 // =========================================

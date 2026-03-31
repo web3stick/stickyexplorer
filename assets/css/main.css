@@ -169,10 +169,3 @@ th, td {
 .block { display: block; }
 .inline { display: inline; }
 .inline-flex { display: inline-flex; }
-
-/* =========================================
-   SVG Icons
-   ========================================= */
-svg {
-    display: inline-block;
-}

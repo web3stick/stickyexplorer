@@ -9,6 +9,7 @@ use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago, transaction_hash};
 use crate::logic::network::get_stored_network_id;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
+use crate::components::widgets::{get_matching_widgets, WidgetType};
 // =========================================
 
 #[derive(Clone, Serialize)]
@@ -80,64 +81,57 @@ pub fn TxDetail(tx_hash: String) -> Element {
     }
 
     let ptx = parsed_tx().unwrap();
+    let tx_detail = tx().unwrap();
+    let widgets = get_matching_widgets(&tx_detail);
+    
+    // Separate explanation and utility widgets
+    let explanation_widgets: Vec<_> = widgets.iter().filter(|w| w.widget_type == WidgetType::Explanation).collect();
+    let utility_widgets: Vec<_> = widgets.iter().filter(|w| w.widget_type == WidgetType::Utility).collect();
 
     rsx! {
         div {
             h1 { class: "mb-4 text-xl font-bold", "Transaction" }
 
-            div { class: "mb-6 rounded-lg border border-gray-200 bg-white text-sm",
-                dl { class: "grid gap-px sm:grid-cols-2 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&>div]:border-b [&>div]:border-gray-100 [&>div]:px-4 [&>div]:py-2 [&>div:last-child]:border-b-0",
+            div { class: "detail-card",
+                dl {
                     // Hash
                     div { class: "sm:col-span-2",
-                        dt { class: "shrink-0 text-gray-500", "Hash" }
-                        dd { class: "flex flex-1 min-w-0 items-center justify-between gap-2",
-                            span { class: "break-all",
-                                transaction_hash { hash: ptx.hash.clone(), truncate: false }
-                            }
-                            span {
-                                if let Some(success) = ptx.is_success {
-                                    if success {
-                                        span { class: "text-green-600", "✓" }
-                                    } else {
-                                        span { class: "text-red-600", "✗" }
-                                    }
-                                } else {
-                                    span { class: "text-yellow-500", "⏳" }
-                                }
-                            }
+                        dt { "Hash" }
+                        dd { class: "break-all",
+                            transaction_hash { hash: ptx.hash.clone(), truncate: false }
                         }
                     }
                     // Signer
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Signer" }
+                        dt { "Signer" }
                         dd {
                             account_id { account_id: ptx.signer_id.clone() }
                         }
                     }
                     // Receiver
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Receiver" }
+                        dt { "Receiver" }
                         dd {
                             account_id { account_id: ptx.receiver_id.clone() }
                         }
                     }
                     // Block
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Block" }
+                        dt { "Block" }
                         dd {
                             block_height { height: ptx.block_height }
                         }
                     }
                     // Time
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Time" }
+                        dt { "Time" }
                         dd {
                             time_ago { timestamp_ns: ptx.timestamp.clone() }
                         }
                     }
                     // Gas
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Gas Used" }
+                        dt { "Gas Used" }
                         dd {
                             gas_amount { gas: ptx.gas_burnt }
                         }
@@ -145,15 +139,20 @@ pub fn TxDetail(tx_hash: String) -> Element {
                 }
             }
 
+            // Explanation widgets (e.g., NEAR transfer, FT transfer)
+            for widget in explanation_widgets {
+                {(widget.render)(&tx_detail)}
+            }
+
             // Actions
             if !ptx.actions.is_empty() {
-                div { class: "mb-6 rounded-lg border border-gray-200 bg-white text-sm",
+                div { class: "detail-card",
                     div { class: "border-b border-gray-100 px-4 py-2",
                         h2 { class: "text-xs font-medium uppercase text-gray-500", "Actions" }
                     }
                     div { class: "px-4 py-3",
                         for (i, action) in ptx.actions.iter().enumerate() {
-                            div { key: "{i}", class: "font-mono text-xs py-1",
+                            div { key: "{i}", class: "action-item",
                                 "{action.action_type}"
                                 if let Some(ref method) = action.method_name {
                                     span { class: "text-gray-500", "::{method}" }
@@ -166,13 +165,13 @@ pub fn TxDetail(tx_hash: String) -> Element {
 
             // Transfers
             if !ptx.transfers.is_empty() || !ptx.nft_transfers.is_empty() {
-                div { class: "mb-6 rounded-lg border border-gray-200 bg-white text-sm",
+                div { class: "detail-card",
                     div { class: "border-b border-gray-100 px-4 py-2",
                         h2 { class: "text-xs font-medium uppercase text-gray-500", "Transfers" }
                     }
-                    div { class: "px-4 py-3 flex flex-col gap-1",
+                    div { class: "transfer-list",
                         for transfer in ptx.transfers {
-                            div { key: "ft-{transfer.amount}", class: "text-xs",
+                            div { key: "ft-{transfer.amount}", class: "transfer-item",
                                 if let Some(from) = &transfer.from {
                                     span { "{from} → " }
                                 }
@@ -190,7 +189,7 @@ pub fn TxDetail(tx_hash: String) -> Element {
                             }
                         }
                         for nft_transfer in ptx.nft_transfers {
-                            div { key: "nft-{nft_transfer.token_id}", class: "text-xs",
+                            div { key: "nft-{nft_transfer.token_id}", class: "transfer-item",
                                 if let Some(from) = &nft_transfer.from {
                                     span { "{from} → " }
                                 }
@@ -208,11 +207,11 @@ pub fn TxDetail(tx_hash: String) -> Element {
             // Receipts
             if !ptx.receipts.is_empty() {
                 div { class: "mb-6",
-                    h2 { class: "mb-3 text-lg font-semibold", "Receipts ({ptx.receipts.len()})" }
+                    h2 { class: "section-heading", "Receipts ({ptx.receipts.len()})" }
                     div { class: "space-y-3",
                         for receipt in ptx.receipts {
-                            div { key: "{receipt.receipt.receipt_id}", class: "rounded-lg border border-gray-200 bg-white p-4 text-sm",
-                                div { class: "grid grid-cols-2 gap-2",
+                            div { key: "{receipt.receipt.receipt_id}", class: "receipt-card",
+                                div { class: "receipt-grid",
                                     div {
                                         span { class: "text-gray-500", "From: " }
                                         account_id { account_id: receipt.receipt.predecessor_id.clone() }
@@ -230,6 +229,11 @@ pub fn TxDetail(tx_hash: String) -> Element {
                         }
                     }
                 }
+            }
+
+            // Utility widgets (e.g., raw JSON)
+            for widget in utility_widgets {
+                {(widget.render)(&tx_detail)}
             }
         }
     }
