@@ -29,7 +29,7 @@ cargo update
 
 
 # netlify
-# stickyexplorer
+# stickyweb-stickyexplorer
 netlify deploy
 netlify deploy --prod
 ```

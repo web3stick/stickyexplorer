@@ -141,7 +141,7 @@ pub fn Navbar() -> Element {
         header { id: "header",
             div {
                 div { class: "navbar-left",
-                    Link { to: Route::MainnetHome {}, class: "logo", "StickyExplorer" }
+                    Link { to: Route::MainnetHome {}, class: "logo", "STICKYEXPLORER" }
                     button_network {}
                 }
                 div { class: "navbar-right", search_bar {} }
