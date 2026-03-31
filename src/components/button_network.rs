@@ -29,14 +29,14 @@ pub fn button_network() -> Element {
     };
 
     let button_class = match network_id() {
-        NetworkId::Mainnet => "bg-[#8CA2F5] hover:bg-[#7a91e8]",
-        NetworkId::Testnet => "bg-[#C9A8F4] hover:bg-[#b895e3]",
+        NetworkId::Mainnet => "bg-[#8CA2F5] hover:bg-[#7a91e8] text-white",
+        NetworkId::Testnet => "bg-[#C9A8F4] hover:bg-[#b895e3] text-white",
     };
 
     rsx! {
         button {
             onclick: toggle_network_handler,
-            class: "px-3 py-1.5 rounded-lg text-white font-medium text-sm transition-colors {button_class}",
+            class: "font-medium text-sm transition-colors {button_class}",
             "{network_id().as_str().to_uppercase()}"
         }
     }

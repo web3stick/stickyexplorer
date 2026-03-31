@@ -87,26 +87,24 @@ pub fn search_bar() -> Element {
     rsx! {
         form {
             onsubmit: handle_search,
-            class: "flex gap-2",
+            class: "search-form",
             div {
-                class: "relative flex-1",
+                class: "search-input-wrapper",
                 input {
                     r#type: "text",
                     value: "{query}",
                     oninput: move |e| query.set(e.value()),
                     placeholder: "Search tx, block, or account",
-                    class: "w-full rounded-lg border border-gray-300 bg-white px-4 py-2 pr-20 text-sm focus:border-blue-500 focus:outline-none",
                 }
                 if let Some(_hint) = search_type() {
                     span {
-                        class: "absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400",
+                        class: "search-hint",
                         "{hint_label}"
                     }
                 }
             }
             button {
                 r#type: "submit",
-                class: "rounded-lg bg-[#8CA2F5] px-3 py-2 sm:px-4 text-sm font-medium text-white hover:bg-[#7a91e8]",
                 svg {
                     class: "size-4 sm:hidden",
                     fill: "none",
@@ -119,7 +117,7 @@ pub fn search_bar() -> Element {
                         d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
                     }
                 }
-                span { class: "hidden sm:inline", "Search" }
+                span { class: "hidden sm:block", "Search" }
             }
         }
     }

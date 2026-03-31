@@ -138,37 +138,37 @@ pub fn Home() -> Element {
     rsx! {
         div {
             h1 { class: "mb-4 text-xl font-bold", "Latest Blocks" }
-            
+
             // Desktop table
-            div { class: "hidden sm:block overflow-x-auto rounded-lg border border-gray-200 bg-white",
-                table { class: "w-full text-sm",
+            div { class: "table-container",
+                table {
                     thead {
-                        tr { class: "border-b border-gray-200 bg-gray-50 text-left text-xs font-medium uppercase text-gray-500",
-                            th { class: "px-4 py-3", "Height" }
-                            th { class: "px-4 py-3", "Time" }
-                            th { class: "px-4 py-3", "Author" }
-                            th { class: "px-4 py-3 text-right", "Txns" }
-                            th { class: "px-4 py-3 text-right", "Receipts" }
-                            th { class: "px-4 py-3 text-right", "Gas Used" }
+                        tr {
+                            th { "Height" }
+                            th { "Time" }
+                            th { "Author" }
+                            th { class: "text-right", "Txns" }
+                            th { class: "text-right", "Receipts" }
+                            th { class: "text-right", "Gas Used" }
                         }
                     }
                     tbody {
                         for block in blocks() {
-                            tr { key: "{block.block_height}", class: "border-b border-gray-100 hover:bg-gray-50",
-                                td { class: "px-4 py-3",
+                            tr {
+                                td {
                                     span { class: "font-medium",
                                         block_height { height: block.block_height }
                                     }
                                 }
-                                td { class: "px-4 py-3 text-gray-500",
+                                td { class: "text-gray-500",
                                     time_ago { timestamp_ns: block.block_timestamp.clone() }
                                 }
-                                td { class: "px-4 py-3",
+                                td {
                                     account_id { account_id: block.author_id.clone() }
                                 }
-                                td { class: "px-4 py-3 text-right", "{block.num_transactions}" }
-                                td { class: "px-4 py-3 text-right", "{block.num_receipts}" }
-                                td { class: "px-4 py-3 text-right",
+                                td { class: "text-right", "{block.num_transactions}" }
+                                td { class: "text-right", "{block.num_receipts}" }
+                                td { class: "text-right",
                                     gas_amount { gas: block.gas_burnt.parse().unwrap_or(0) }
                                 }
                             }
@@ -178,10 +178,10 @@ pub fn Home() -> Element {
             }
 
             // Mobile cards
-            div { class: "sm:hidden rounded-lg border border-gray-200 bg-white divide-y divide-gray-100",
+            div { class: "mobile-cards",
                 for block in blocks() {
-                    div { key: "{block.block_height}", class: "px-3 py-2.5",
-                        div { class: "flex items-center justify-between gap-2 mb-0.5",
+                    div {
+                        div { class: "flex items-center justify-between gap-2 mb-1",
                             span { class: "font-medium text-sm",
                                 block_height { height: block.block_height }
                             }
@@ -201,13 +201,15 @@ pub fn Home() -> Element {
                 p { class: "py-8 text-center text-sm text-gray-500", "No blocks available" }
             }
 
-            // Load more button
+            // Load more button - centered
             if has_more() {
-                button {
-                    onclick: load_more,
-                    disabled: loading_more(),
-                    class: "mt-4 w-full py-2 px-4 bg-[#8CA2F5] text-white rounded-lg hover:bg-[#7a91e8] disabled:opacity-50",
-                    if loading_more() { "Loading..." } else { "Load More" }
+                div { class: "load-more-container",
+                    button {
+                        onclick: load_more,
+                        disabled: loading_more(),
+                        class: "load-more-button",
+                        if loading_more() { "Loading..." } else { "Load More" }
+                    }
                 }
             }
         }
