@@ -33,7 +33,7 @@ pub fn Navbar() -> Element {
                     Link {
                         to: Route::Home {},
                         class: "logo",
-                        "StickyExplorer"
+                        "STICKYEXPLORER"
                     }
                     button_network {}
                 }

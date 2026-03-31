@@ -32,40 +32,26 @@ struct TxParams {
 
 #[component]
 pub fn AccountDetail(account_id: String) -> Element {
-    let mut txs = use_signal(|| Vec::<AccountTx>::new());
-    let mut parsed_txs = use_signal(|| Vec::<(String, ParsedTx)>::new());
-    let mut loading = use_signal(|| true);
-    let mut error = use_signal(|| Option::<String>::None);
-    let mut resume_token = use_signal(|| Option::<String>::None);
-    let mut has_more = use_signal(|| true);
-    let mut loading_more = use_signal(|| false);
-    let mut txs_count = use_signal(|| 0u64);
+    let network_id = get_stored_network_id();
+    let api_base = network_id.api_base_url();
+    let account_id_for_resource = account_id.clone();
     
     // Global cache for faster navigation
     let tx_cache = use_signal(|| TxCache::new());
-
-    let network_id = get_stored_network_id();
-    let api_base = network_id.api_base_url();
     
-    // Clone account_id for closures before moving
-    let account_id_for_effect = account_id.clone();
-    let account_id_for_load_more = account_id.clone();
-    let account_id_display = account_id.clone();
-
-    // Initial load
-    use_effect(move || {
+    // Use resource for data fetching - automatically re-runs when account_id changes
+    let account_data = use_resource(move || {
         let api_base = api_base.to_string();
-        let account_id = account_id_for_effect.clone();
-        spawn(async move {
-            loading.set(true);
-            error.set(None);
-            
+        let account_id = account_id_for_resource.clone();
+        let mut tx_cache = tx_cache.clone();
+        
+        async move {
             let client = Client::new();
             let filters = AccountFilters::default();
             let params = AccountParams {
                 account_id: &account_id,
                 filters: &filters,
-                resume_token: None,
+                resume_token: None::<&str>,
                 limit: Some(BATCH_SIZE),
             };
 
@@ -83,107 +69,41 @@ pub fn AccountDetail(account_id: String) -> Element {
                                 .filter_map(|v| serde_json::from_value(v.clone()).ok())
                                 .collect();
                             
-                            txs_count.set(data.get("txs_count").and_then(|v| v.as_u64()).unwrap_or(0));
-                            
-                            if !new_txs.is_empty() {
-                                resume_token.set(data.get("resume_token").and_then(|v| v.as_str()).map(String::from));
-                                if new_txs.len() < BATCH_SIZE as usize {
-                                    has_more.set(false);
-                                }
-                            } else {
-                                has_more.set(false);
-                            }
+                            let txs_count = data.get("txs_count").and_then(|v| v.as_u64()).unwrap_or(0);
                             
                             // Fetch full transaction details (with caching)
                             let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
-                            let parsed = fetch_and_parse_transactions(&api_base, &hashes, tx_cache).await;
-                            txs.set(new_txs);
-                            parsed_txs.set(parsed);
+                            let parsed = fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache).await;
+                            
+                            return Some((new_txs, parsed, txs_count));
                         }
                     }
                 }
-                Err(e) => {
-                    error.set(Some(e.to_string()));
-                }
+                Err(_) => {}
             }
-            loading.set(false);
-        });
+            None
+        }
     });
 
-    let load_more = move |_| {
-        if !has_more() || loading_more() {
-            return;
-        }
-        
-        let api_base = api_base.to_string();
-        let account_id = account_id_for_load_more.clone();
-        let token = resume_token();
-        loading_more.set(true);
-
-        spawn(async move {
-            let client = Client::new();
-            let filters = AccountFilters::default();
-            let params = AccountParams {
-                account_id: &account_id,
-                filters: &filters,
-                resume_token: token.as_deref(),
-                limit: Some(BATCH_SIZE),
-            };
-
-            if let Ok(resp) = client
-                .post(format!("{}/v0/account", api_base))
-                .json(&params)
-                .send()
-                .await
-            {
-                if let Ok(data) = resp.json::<serde_json::Value>().await {
-                    if let Some(account_txs) = data.get("account_txs").and_then(|v| v.as_array()) {
-                        let new_txs: Vec<AccountTx> = account_txs
-                            .iter()
-                            .filter_map(|v| serde_json::from_value(v.clone()).ok())
-                            .collect();
-                        
-                        if new_txs.is_empty() || new_txs.len() < BATCH_SIZE as usize {
-                            has_more.set(false);
-                        }
-                        
-                        if let Some(resume) = data.get("resume_token").and_then(|v| v.as_str()) {
-                            resume_token.set(Some(resume.to_string()));
-                        }
-                        
-                        // Fetch full transaction details for new txs (with caching)
-                        let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
-                        let parsed = fetch_and_parse_transactions(&api_base, &hashes, tx_cache).await;
-                        
-                        txs.write().extend(new_txs);
-                        parsed_txs.write().extend(parsed);
-                    }
-                }
-            }
-            loading_more.set(false);
-        });
-    };
-
-    let txs_count_val = txs_count();
-    let txs_list = txs();
-    let parsed_list = parsed_txs();
-    let has_more_val = has_more();
-    let loading_more_val = loading_more();
-    let loading_val = loading();
-    let error_val = error();
+    let account_id_display = account_id.clone();
     
-    // Create a map for quick lookup
-    let parsed_map: std::collections::HashMap<String, ParsedTx> = parsed_list.into_iter().collect();
+    // Read the resource state
+    let data = account_data.read();
     
-    let txs_list_for_desktop = txs_list.clone();
-    let txs_list_for_mobile = txs_list.clone();
-    let txs_list_empty = txs_list.is_empty();
-
-    if let Some(err) = error_val {
+    if data.is_none() || data.as_ref().unwrap().is_none() {
         return rsx! {
-            p { class: "text-red-600", "Error loading account: {err}" }
+            div { class: "empty-state", "Loading account..." }
         };
     }
+    
+    let inner_data = data.as_ref().unwrap().as_ref().unwrap();
+    let txs = &inner_data.0;
+    let parsed_list = &inner_data.1;
+    let txs_count = inner_data.2;
+    
+    let parsed_map: std::collections::HashMap<String, ParsedTx> = parsed_list.iter().cloned().collect();
+    let txs_list_empty = txs.is_empty();
+    let txs_count_val = txs_count;
 
     rsx! {
         div {
@@ -212,7 +132,7 @@ pub fn AccountDetail(account_id: String) -> Element {
                         }
                     }
                     tbody {
-                        for atx in txs_list_for_desktop {
+                        for atx in txs.iter() {
                             if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
                                 tr {
                                     td {
@@ -260,7 +180,7 @@ pub fn AccountDetail(account_id: String) -> Element {
 
             // Mobile cards
             div { class: "mobile-cards",
-                for atx in txs_list_for_mobile {
+                for atx in txs.iter() {
                     if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
                         div {
                             div { class: "flex items-center justify-between gap-2 mb-1",
@@ -309,26 +229,14 @@ pub fn AccountDetail(account_id: String) -> Element {
                 }
             }
 
-            if !loading_val && txs_list_empty {
+            if txs_list_empty {
                 p { class: "empty-state", "No transactions found" }
-            }
-
-            // Load more button - centered
-            if has_more_val {
-                div { class: "load-more-container",
-                    button {
-                        onclick: load_more,
-                        disabled: loading_more_val,
-                        class: "load-more-button",
-                        if loading_more_val { "Loading..." } else { "Load More" }
-                    }
-                }
             }
         }
     }
 }
 
-async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], mut tx_cache: Signal<TxCache>) -> Vec<(String, ParsedTx)> {
+async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], tx_cache: &mut Signal<TxCache>) -> Vec<(String, ParsedTx)> {
     if hashes.is_empty() {
         return Vec::new();
     }
