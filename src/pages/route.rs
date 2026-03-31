@@ -12,20 +12,94 @@ use crate::components::button_network::button_network;
 use crate::logic::network::{NetworkId, save_network_id};
 // =========================================
 
+#[component]
+fn MainnetHome() -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Mainnet);
+    });
+    rsx! { HomePage {} }
+}
+
+#[component]
+fn MainnetHomeRedirect() -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Mainnet);
+    });
+    let navigator = use_navigator();
+    use_effect(move || {
+        navigator.push("/mainnet");
+    });
+    rsx! { div { "Redirecting..." } }
+}
+
+#[component]
+fn MainnetAccount(account_id: String) -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Mainnet);
+    });
+    rsx! { AccountDetail { account_id, network: NetworkId::Mainnet } }
+}
+
+#[component]
+fn MainnetTx(tx_hash: String) -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Mainnet);
+    });
+    rsx! { TxDetail { tx_hash, network: NetworkId::Mainnet } }
+}
+
+#[component]
+fn MainnetBlock(block_id: String) -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Mainnet);
+    });
+    rsx! { BlockDetail { block_id, network: NetworkId::Mainnet } }
+}
+
+#[component]
+fn TestnetHomeRedirect() -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Testnet);
+    });
+    let navigator = use_navigator();
+    use_effect(move || {
+        navigator.push("/testnet");
+    });
+    rsx! { div { "Redirecting..." } }
+}
+
+#[component]
+fn TestnetAccount(account_id: String) -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Testnet);
+    });
+    rsx! { AccountDetail { account_id, network: NetworkId::Testnet } }
+}
+
+#[component]
+fn TestnetTx(tx_hash: String) -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Testnet);
+    });
+    rsx! { TxDetail { tx_hash, network: NetworkId::Testnet } }
+}
+
+#[component]
+fn TestnetBlock(block_id: String) -> Element {
+    use_effect(move || {
+        let _ = save_network_id(NetworkId::Testnet);
+    });
+    rsx! { BlockDetail { block_id, network: NetworkId::Testnet } }
+}
+
 #[derive(Debug, Clone, Routable, PartialEq)]
 pub enum Route {
     #[layout(Navbar)]
-        #[route("/")]
-        Home {},
-        #[route("/account/:account_id")]
-        Account { account_id: String },
-        #[route("/tx/:tx_hash")]
-        Tx { tx_hash: String },
-        #[route("/block/:block_id")]
-        Block { block_id: String },
         // Mainnet routes
-        #[route("/mainnet")]
+        #[route("/")]
         MainnetHome {},
+        #[route("/mainnet")]
+        MainnetHomeRedirect {},
         #[route("/mainnet/account/:account_id")]
         MainnetAccount { account_id: String },
         #[route("/mainnet/tx/:tx_hash")]
@@ -34,7 +108,7 @@ pub enum Route {
         MainnetBlock { block_id: String },
         // Testnet routes
         #[route("/testnet")]
-        TestnetHome {},
+        TestnetHomeRedirect {},
         #[route("/testnet/account/:account_id")]
         TestnetAccount { account_id: String },
         #[route("/testnet/tx/:tx_hash")]
@@ -51,7 +125,7 @@ pub fn Navbar() -> Element {
             div {
                 div { class: "navbar-left",
                     Link {
-                        to: Route::Home {},
+                        to: Route::MainnetHome {},
                         class: "logo",
                         "StickyExplorer"
                     }
@@ -67,72 +141,6 @@ pub fn Navbar() -> Element {
             Outlet::<Route> {}
         }
     }
-}
-
-#[component]
-fn Home() -> Element {
-    rsx! { HomePage {} }
-}
-
-#[component]
-fn Account(account_id: String) -> Element {
-    rsx! { AccountDetail { account_id } }
-}
-
-#[component]
-fn Tx(tx_hash: String) -> Element {
-    rsx! { TxDetail { tx_hash } }
-}
-
-#[component]
-fn Block(block_id: String) -> Element {
-    rsx! { BlockDetail { block_id } }
-}
-
-#[component]
-fn MainnetHome() -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Mainnet);
-    });
-    rsx! { HomePage {} }
-}
-
-#[component]
-fn MainnetAccount(account_id: String) -> Element {
-    rsx! { AccountDetail { account_id } }
-}
-
-#[component]
-fn MainnetTx(tx_hash: String) -> Element {
-    rsx! { TxDetail { tx_hash } }
-}
-
-#[component]
-fn MainnetBlock(block_id: String) -> Element {
-    rsx! { BlockDetail { block_id } }
-}
-
-#[component]
-fn TestnetHome() -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Testnet);
-    });
-    rsx! { HomePage {} }
-}
-
-#[component]
-fn TestnetAccount(account_id: String) -> Element {
-    rsx! { AccountDetail { account_id } }
-}
-
-#[component]
-fn TestnetTx(tx_hash: String) -> Element {
-    rsx! { TxDetail { tx_hash } }
-}
-
-#[component]
-fn TestnetBlock(block_id: String) -> Element {
-    rsx! { BlockDetail { block_id } }
 }
 // =========================================
 // copyright 2026 by sleet.near

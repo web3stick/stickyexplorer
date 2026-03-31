@@ -7,7 +7,7 @@ use reqwest::Client;
 use serde::Serialize;
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago, transaction_hash};
-use crate::logic::network::get_stored_network_id;
+use crate::logic::network::NetworkId;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use crate::components::widgets::{get_matching_widgets, WidgetType};
 // =========================================
@@ -18,14 +18,13 @@ struct TxParams {
 }
 
 #[component]
-pub fn TxDetail(tx_hash: String) -> Element {
+pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
     let mut tx = use_signal(|| Option::<TransactionDetail>::None);
     let mut parsed_tx = use_signal(|| Option::<ParsedTx>::None);
     let mut loading = use_signal(|| true);
     let mut error = use_signal(|| Option::<String>::None);
 
-    let network_id = get_stored_network_id();
-    let api_base = network_id.api_base_url();
+    let api_base = network.api_base_url();
 
     use_effect(move || {
         let api_base = api_base.to_string();

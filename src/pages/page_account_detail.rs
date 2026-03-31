@@ -7,7 +7,7 @@ use reqwest::Client;
 use serde::Serialize;
 use crate::api::types::{AccountFilters, AccountTx};
 use crate::components::ui::{time_ago, transaction_hash};
-use crate::logic::network::get_stored_network_id;
+use crate::logic::network::NetworkId;
 use crate::logic::tx_cache::TxCache;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 // =========================================
@@ -31,9 +31,8 @@ struct TxParams {
 }
 
 #[component]
-pub fn AccountDetail(account_id: String) -> Element {
-    let network_id = get_stored_network_id();
-    let api_base = network_id.api_base_url();
+pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
+    let api_base = network.api_base_url();
     
     // State
     let mut txs = use_signal(|| Vec::<AccountTx>::new());

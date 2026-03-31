@@ -7,7 +7,7 @@ use reqwest::Client;
 use serde::Serialize;
 use crate::api::types::{BlockDetailResponse, BlockTx};
 use crate::components::ui::{account_id, block_height, block_hash, gas_amount, near_amount, time_ago, transaction_hash};
-use crate::logic::network::get_stored_network_id;
+use crate::logic::network::NetworkId;
 // =========================================
 
 #[derive(Clone, Serialize)]
@@ -18,14 +18,13 @@ struct BlockParams {
 }
 
 #[component]
-pub fn BlockDetail(block_id: String) -> Element {
+pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
     let mut block = use_signal(|| Option::<BlockDetailResponse>::None);
     let mut loading = use_signal(|| true);
     let mut error = use_signal(|| Option::<String>::None);
     let mut visible_count = use_signal(|| 40usize);
 
-    let network_id = get_stored_network_id();
-    let api_base = network_id.api_base_url();
+    let api_base = network.api_base_url();
 
     use_effect(move || {
         let api_base = api_base.to_string();
@@ -33,16 +32,12 @@ pub fn BlockDetail(block_id: String) -> Element {
         spawn(async move {
             loading.set(true);
             error.set(None);
-            
+
             let client = Client::new();
-            
+
             // Determine if block_id is a number (height) or string (hash)
-            let block_id_str = if block_id.parse::<u64>().is_ok() {
-                block_id.clone()
-            } else {
-                block_id.clone()
-            };
-            
+            let block_id_str = block_id.clone();
+
             let params = BlockParams {
                 block_id: block_id_str,
                 with_transactions: Some(true),

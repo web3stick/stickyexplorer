@@ -42,13 +42,6 @@ pub fn search_bar() -> Element {
         }
 
         match search_type.unwrap() {
-            "block" => {
-                let stripped = q.replace(',', "");
-                navigator.push(format!("/block/{}", stripped));
-            }
-            "tx" => {
-                navigator.push(format!("/tx/{}", q));
-            }
             "account" => {
                 // Auto-switch network based on account suffix
                 // .testnet → testnet, everything else (.near, .tg, etc.) → mainnet
@@ -57,6 +50,15 @@ pub fn search_bar() -> Element {
                 } else {
                     navigator.push(format!("/mainnet/account/{}", q));
                 }
+            }
+            "block" => {
+                // Blocks are network-specific, default to mainnet
+                let stripped = q.replace(',', "");
+                navigator.push(format!("/mainnet/block/{}", stripped));
+            }
+            "tx" => {
+                // Transactions are network-specific, default to mainnet  
+                navigator.push(format!("/mainnet/tx/{}", q));
             }
             _ => {}
         }
