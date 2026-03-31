@@ -24,7 +24,7 @@
     }
 }
 
-/* Left side: Logo + Search */
+/* Left side: Logo + Network button */
 .navbar-left {
     display: flex;
     flex-direction: column;
@@ -38,8 +38,7 @@
         flex-direction: row;
         align-items: center;
         width: auto;
-        flex: 1;
-        max-width: 600px;
+        gap: 24px;
     }
 }
 
@@ -56,9 +55,19 @@
     text-decoration: none;
 }
 
-/* Right side: Network button */
+/* Right side: Search */
 .navbar-right {
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .navbar-right {
+        width: auto;
+        flex: 1;
+        max-width: 500px;
+        justify-content: flex-end;
+    }
 }

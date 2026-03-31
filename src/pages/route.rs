@@ -35,12 +35,10 @@ pub fn Navbar() -> Element {
                         class: "logo",
                         "StickyExplorer"
                     }
-                    div { class: "flex-1",
-                        search_bar {}
-                    }
+                    button_network {}
                 }
                 div { class: "navbar-right",
-                    button_network {}
+                    search_bar {}
                 }
             }
         }

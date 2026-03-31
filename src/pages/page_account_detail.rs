@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
 use crate::api::types::{AccountFilters, AccountTx};
-use crate::components::ui::{block_height, time_ago, transaction_hash};
+use crate::components::ui::{time_ago, transaction_hash};
 use crate::logic::network::get_stored_network_id;
 // =========================================
 
@@ -179,7 +179,9 @@ pub fn AccountDetail(account_id: String) -> Element {
                         tr {
                             th { "Tx Hash" }
                             th { "Time" }
-                            th { "Block" }
+                            th { "Signer" }
+                            th { "Receiver" }
+                            th { "Action" }
                             th { "Status" }
                         }
                     }
@@ -193,13 +195,33 @@ pub fn AccountDetail(account_id: String) -> Element {
                                     time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                 }
                                 td {
-                                    block_height { height: tx.tx_block_height }
+                                    if tx.is_signer || tx.is_real_signer {
+                                        span { class: "font-mono text-xs", "{account_id_display}" }
+                                    } else {
+                                        span { class: "text-gray-400 text-xs", "—" }
+                                    }
+                                }
+                                td {
+                                    if tx.is_receiver || tx.is_real_receiver {
+                                        span { class: "font-mono text-xs", "{account_id_display}" }
+                                    } else {
+                                        span { class: "text-gray-400 text-xs", "—" }
+                                    }
+                                }
+                                td {
+                                    if tx.is_function_call {
+                                        span { class: "text-xs", "Function Call" }
+                                    } else if tx.is_delegated_signer {
+                                        span { class: "text-xs", "Delegate" }
+                                    } else {
+                                        span { class: "text-xs text-gray-400", "Transfer" }
+                                    }
                                 }
                                 td {
                                     if tx.is_success {
-                                        span { class: "status-success", "✓ Success" }
+                                        span { class: "status-success", "✓" }
                                     } else {
-                                        span { class: "status-failed", "✗ Failed" }
+                                        span { class: "status-failed", "✗" }
                                     }
                                 }
                             }
@@ -222,10 +244,36 @@ pub fn AccountDetail(account_id: String) -> Element {
                                 span { class: "status-failed text-xs", "✗" }
                             }
                         }
-                        div { class: "text-sm text-gray-500",
+                        div { class: "text-sm text-gray-500 mb-1",
                             time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
-                            " • Block "
-                            block_height { height: tx.tx_block_height }
+                        }
+                        div { class: "flex flex-col gap-1 text-sm",
+                            div {
+                                span { class: "text-gray-500 text-xs", "Signer: " }
+                                if tx.is_signer || tx.is_real_signer {
+                                    span { class: "font-mono text-xs", "{account_id_display}" }
+                                } else {
+                                    span { class: "text-gray-400 text-xs", "—" }
+                                }
+                            }
+                            div {
+                                span { class: "text-gray-500 text-xs", "Receiver: " }
+                                if tx.is_receiver || tx.is_real_receiver {
+                                    span { class: "font-mono text-xs", "{account_id_display}" }
+                                } else {
+                                    span { class: "text-gray-400 text-xs", "—" }
+                                }
+                            }
+                            div {
+                                span { class: "text-gray-500 text-xs", "Action: " }
+                                if tx.is_function_call {
+                                    span { class: "text-xs", "Function Call" }
+                                } else if tx.is_delegated_signer {
+                                    span { class: "text-xs", "Delegate" }
+                                } else {
+                                    span { class: "text-xs text-gray-400", "Transfer" }
+                                }
+                            }
                         }
                     }
                 }
