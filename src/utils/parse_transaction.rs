@@ -98,8 +98,7 @@ pub fn parse_action(action: &TransactionAction) -> ParsedAction {
                 if let Some(first_key) = obj.keys().next() {
                     result.action_type = first_key.clone();
                     if let Some(inner) = obj.get(first_key).and_then(|v| v.as_object()) {
-                        if let Some(method_name) =
-                            inner.get("method_name").and_then(|v| v.as_str())
+                        if let Some(method_name) = inner.get("method_name").and_then(|v| v.as_str())
                         {
                             result.method_name = Some(method_name.to_string());
                         }
@@ -121,12 +120,16 @@ pub fn parse_action(action: &TransactionAction) -> ParsedAction {
                             result.beneficiary_id = Some(beneficiary_id.to_string());
                         }
                         if let Some(code) = inner.get("code").and_then(|v| v.as_str()) {
-                            if let Ok(bytes) = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, code) {
+                            if let Ok(bytes) = base64::Engine::decode(
+                                &base64::engine::general_purpose::STANDARD,
+                                code,
+                            ) {
                                 result.code_hash = Some(encode_base58(&bytes));
                             }
                         }
                         // Parse access key permission
-                        if let Some(access_key) = inner.get("access_key").and_then(|v| v.as_object())
+                        if let Some(access_key) =
+                            inner.get("access_key").and_then(|v| v.as_object())
                         {
                             if let Some(permission) = access_key.get("permission") {
                                 result.access_key_permission = Some(permission.to_string());
@@ -161,11 +164,17 @@ fn get_transfer_deposit(action: &TransactionAction) -> Option<String> {
             if let Some(obj) = v.as_object() {
                 // Top-level format: { Transfer: { deposit: "..." } }
                 if let Some(transfer) = obj.get("Transfer").and_then(|v| v.as_object()) {
-                    return transfer.get("deposit").and_then(|v| v.as_str()).map(String::from);
+                    return transfer
+                        .get("deposit")
+                        .and_then(|v| v.as_str())
+                        .map(String::from);
                 }
                 // Delegate inner format: { type: "Transfer", deposit: "..." }
                 if obj.get("type").and_then(|v| v.as_str()) == Some("Transfer") {
-                    return obj.get("deposit").and_then(|v| v.as_str()).map(String::from);
+                    return obj
+                        .get("deposit")
+                        .and_then(|v| v.as_str())
+                        .map(String::from);
                 }
             }
             None
@@ -210,18 +219,14 @@ fn extract_transfers(tx: &TransactionDetail) -> Vec<TransferInfo> {
         if let TransactionAction::Complex(v) = &actions[0] {
             if let Some(obj) = v.as_object() {
                 if let Some(delegate) = obj.get("Delegate").and_then(|v| v.as_object()) {
-                    if let Some(sender_id) =
-                        delegate.get("sender_id").and_then(|v| v.as_str())
-                    {
+                    if let Some(sender_id) = delegate.get("sender_id").and_then(|v| v.as_str()) {
                         signer = sender_id.to_string();
                     }
-                    if let Some(receiver_id) =
-                        delegate.get("receiver_id").and_then(|v| v.as_str())
+                    if let Some(receiver_id) = delegate.get("receiver_id").and_then(|v| v.as_str())
                     {
                         receiver = receiver_id.to_string();
                     }
-                    if let Some(inner_actions) =
-                        delegate.get("actions").and_then(|v| v.as_array())
+                    if let Some(inner_actions) = delegate.get("actions").and_then(|v| v.as_array())
                     {
                         actions = inner_actions
                             .iter()
@@ -253,9 +258,7 @@ fn extract_transfers(tx: &TransactionDetail) -> Vec<TransferInfo> {
     for action in &actions {
         if let Some(beneficiary) = get_delete_account_beneficiary(action) {
             for r in &tx.receipts {
-                if r.receipt.predecessor_id == "system"
-                    && r.receipt.receiver_id == beneficiary
-                {
+                if r.receipt.predecessor_id == "system" && r.receipt.receiver_id == beneficiary {
                     if let Some(action_data) = r
                         .receipt
                         .receipt
@@ -263,9 +266,8 @@ fn extract_transfers(tx: &TransactionDetail) -> Vec<TransferInfo> {
                         .and_then(|o| o.get("Action"))
                         .and_then(|v| v.as_object())
                     {
-                        if let Some(receipt_actions) = action_data
-                            .get("actions")
-                            .and_then(|v| v.as_array())
+                        if let Some(receipt_actions) =
+                            action_data.get("actions").and_then(|v| v.as_array())
                         {
                             for ra in receipt_actions {
                                 let ra_action = TransactionAction::Complex(ra.clone());
@@ -302,25 +304,31 @@ fn extract_transfers(tx: &TransactionDetail) -> Vec<TransferInfo> {
                         // NEP-141 single-token events
                         if standard == "nep141" {
                             for item in data {
-                                let amount = item
-                                    .get("amount")
-                                    .and_then(|v| v.as_str())
-                                    .unwrap_or("0");
+                                let amount =
+                                    item.get("amount").and_then(|v| v.as_str()).unwrap_or("0");
                                 if amount == "0" {
                                     continue;
                                 }
                                 if let Some(event) = evt.get("event").and_then(|v| v.as_str()) {
                                     let (from, to) = match event {
                                         "ft_transfer" => (
-                                            item.get("old_owner_id").and_then(|v| v.as_str()).map(String::from),
-                                            item.get("new_owner_id").and_then(|v| v.as_str()).map(String::from),
+                                            item.get("old_owner_id")
+                                                .and_then(|v| v.as_str())
+                                                .map(String::from),
+                                            item.get("new_owner_id")
+                                                .and_then(|v| v.as_str())
+                                                .map(String::from),
                                         ),
                                         "ft_mint" => (
                                             None,
-                                            item.get("owner_id").and_then(|v| v.as_str()).map(String::from),
+                                            item.get("owner_id")
+                                                .and_then(|v| v.as_str())
+                                                .map(String::from),
                                         ),
                                         "ft_burn" => (
-                                            item.get("owner_id").and_then(|v| v.as_str()).map(String::from),
+                                            item.get("owner_id")
+                                                .and_then(|v| v.as_str())
+                                                .map(String::from),
                                             None,
                                         ),
                                         _ => continue,
@@ -350,25 +358,31 @@ fn extract_transfers(tx: &TransactionDetail) -> Vec<TransferInfo> {
                                     .cloned()
                                     .unwrap_or_default();
                                 for (i, tid) in token_ids.iter().enumerate() {
-                                    let amount = amounts
-                                        .get(i)
-                                        .and_then(|v| v.as_str())
-                                        .unwrap_or("0");
+                                    let amount =
+                                        amounts.get(i).and_then(|v| v.as_str()).unwrap_or("0");
                                     if amount == "0" {
                                         continue;
                                     }
                                     if let Some(event) = evt.get("event").and_then(|v| v.as_str()) {
                                         let (from, to) = match event {
                                             "mt_transfer" => (
-                                                item.get("old_owner_id").and_then(|v| v.as_str()).map(String::from),
-                                                item.get("new_owner_id").and_then(|v| v.as_str()).map(String::from),
+                                                item.get("old_owner_id")
+                                                    .and_then(|v| v.as_str())
+                                                    .map(String::from),
+                                                item.get("new_owner_id")
+                                                    .and_then(|v| v.as_str())
+                                                    .map(String::from),
                                             ),
                                             "mt_mint" => (
                                                 None,
-                                                item.get("owner_id").and_then(|v| v.as_str()).map(String::from),
+                                                item.get("owner_id")
+                                                    .and_then(|v| v.as_str())
+                                                    .map(String::from),
                                             ),
                                             "mt_burn" => (
-                                                item.get("owner_id").and_then(|v| v.as_str()).map(String::from),
+                                                item.get("owner_id")
+                                                    .and_then(|v| v.as_str())
+                                                    .map(String::from),
                                                 None,
                                             ),
                                             _ => continue,
@@ -421,15 +435,23 @@ fn extract_nft_transfers(tx: &TransactionDetail) -> Vec<NftTransferInfo> {
                                         {
                                             let (from, to) = match event {
                                                 "nft_transfer" => (
-                                                    item.get("old_owner_id").and_then(|v| v.as_str()).map(String::from),
-                                                    item.get("new_owner_id").and_then(|v| v.as_str()).map(String::from),
+                                                    item.get("old_owner_id")
+                                                        .and_then(|v| v.as_str())
+                                                        .map(String::from),
+                                                    item.get("new_owner_id")
+                                                        .and_then(|v| v.as_str())
+                                                        .map(String::from),
                                                 ),
                                                 "nft_mint" => (
                                                     None,
-                                                    item.get("owner_id").and_then(|v| v.as_str()).map(String::from),
+                                                    item.get("owner_id")
+                                                        .and_then(|v| v.as_str())
+                                                        .map(String::from),
                                                 ),
                                                 "nft_burn" => (
-                                                    item.get("owner_id").and_then(|v| v.as_str()).map(String::from),
+                                                    item.get("owner_id")
+                                                        .and_then(|v| v.as_str())
+                                                        .map(String::from),
                                                     None,
                                                 ),
                                                 _ => continue,
@@ -464,7 +486,11 @@ fn resolve_success(tx: &TransactionDetail) -> Option<bool> {
         return Some(true);
     }
     if let Some(receipt_id) = status.get("SuccessReceiptId").and_then(|v| v.as_str()) {
-        if let Some(receipt) = tx.receipts.iter().find(|r| r.receipt.receipt_id == receipt_id) {
+        if let Some(receipt) = tx
+            .receipts
+            .iter()
+            .find(|r| r.receipt.receipt_id == receipt_id)
+        {
             let r_status = &receipt.execution_outcome.outcome.status;
             if r_status.get("Failure").is_some() {
                 return Some(false);
@@ -510,9 +536,7 @@ pub fn parse_transaction(tx: &TransactionDetail) -> ParsedTx {
         if let TransactionAction::Complex(v) = &actions[0] {
             if let Some(obj) = v.as_object() {
                 if let Some(delegate) = obj.get("Delegate").and_then(|v| v.as_object()) {
-                    if let Some(sender_id) =
-                        delegate.get("sender_id").and_then(|v| v.as_str())
-                    {
+                    if let Some(sender_id) = delegate.get("sender_id").and_then(|v| v.as_str()) {
                         parsed.relayer_id = Some(tx.transaction.signer_id.clone());
                         parsed.signer_id = sender_id.to_string();
                         if let Some(receiver_id) =

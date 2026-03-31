@@ -66,7 +66,11 @@ pub fn decode_base58(encoded: &str) -> Option<Vec<u8>> {
     }
 
     let mut result = Vec::new();
-    for _ in 0..encoded.chars().take_while(|&c| c == BASE58_ALPHABET[0] as char).count() {
+    for _ in 0..encoded
+        .chars()
+        .take_while(|&c| c == BASE58_ALPHABET[0] as char)
+        .count()
+    {
         result.push(0);
     }
     result.extend(bytes[..length].iter().rev().copied());

@@ -2,8 +2,8 @@
 // =========================================
 // Search bar component with network auto-switching
 // =========================================
-use dioxus::prelude::*;
 use crate::utils::format::decode_base58;
+use dioxus::prelude::*;
 // =========================================
 
 /// Detect the type of search query
@@ -57,7 +57,7 @@ pub fn search_bar() -> Element {
                 navigator.push(format!("/mainnet/block/{}", stripped));
             }
             "tx" => {
-                // Transactions are network-specific, default to mainnet  
+                // Transactions are network-specific, default to mainnet
                 navigator.push(format!("/mainnet/tx/{}", q));
             }
             _ => {}
@@ -74,11 +74,8 @@ pub fn search_bar() -> Element {
     };
 
     rsx! {
-        form {
-            onsubmit: handle_search,
-            class: "search-form",
-            div {
-                class: "search-input-wrapper",
+        form { onsubmit: handle_search, class: "search-form",
+            div { class: "search-input-wrapper",
                 input {
                     r#type: "text",
                     value: "{query}",
@@ -86,16 +83,10 @@ pub fn search_bar() -> Element {
                     placeholder: "Search tx, block, or account",
                 }
                 if let Some(_hint) = search_type() {
-                    span {
-                        class: "search-hint",
-                        "{hint_label}"
-                    }
+                    span { class: "search-hint", "{hint_label}" }
                 }
             }
-            button {
-                r#type: "submit",
-                "GO"
-            }
+            button { r#type: "submit", "GO" }
         }
     }
 }

@@ -2,12 +2,14 @@
 // =========================================
 // Block detail page
 // =========================================
+use crate::api::types::{BlockDetailResponse, BlockTx};
+use crate::components::ui::{
+    account_id, block_hash, block_height, gas_amount, near_amount, time_ago, transaction_hash,
+};
+use crate::logic::network::NetworkId;
 use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
-use crate::api::types::{BlockDetailResponse, BlockTx};
-use crate::components::ui::{account_id, block_height, block_hash, gas_amount, near_amount, time_ago, transaction_hash};
-use crate::logic::network::NetworkId;
 // =========================================
 
 #[derive(Clone, Serialize)]
@@ -27,16 +29,16 @@ struct BlockParams {
 #[component]
 pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
     let api_base = network.api_base_url();
-    
+
     // State
     let mut block = use_signal(|| Option::<BlockDetailResponse>::None);
     let mut loading = use_signal(|| true);
     let mut error = use_signal(|| Option::<String>::None);
     let mut visible_count = use_signal(|| 40usize);
-    
+
     // Track current block_id to detect changes
     let mut current_block_id = use_signal(|| String::new());
-    
+
     // Fetch data when block_id changes
     if current_block_id() != block_id {
         current_block_id.set(block_id.clone());
@@ -44,10 +46,10 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
         error.set(None);
         visible_count.set(40);
         block.set(None);
-        
+
         let api_base = api_base.to_string();
         let block_id = block_id.clone();
-        
+
         spawn(async move {
             let client = Client::new();
 
@@ -72,7 +74,9 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                 Ok(resp) => {
                     if let Ok(data) = resp.json::<serde_json::Value>().await {
                         if let Some(_block_data) = data.get("block") {
-                            if let Ok(block_detail) = serde_json::from_value::<BlockDetailResponse>(data.clone()) {
+                            if let Ok(block_detail) =
+                                serde_json::from_value::<BlockDetailResponse>(data.clone())
+                            {
                                 block.set(Some(block_detail));
                             }
                         } else {
@@ -109,7 +113,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
     let txs = &block_data.block_txs;
     let visible_count_val = visible_count();
     let has_more = visible_count_val < txs.len();
-    
+
     // Clone all values needed for rsx before moving
     let block_height_val = b.block_height;
     let block_hash_val = b.block_hash.clone();
@@ -125,7 +129,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
     let tokens_burnt_val = b.tokens_burnt.clone();
     let chunks_included_val = b.chunks_included;
     let protocol_version_val = b.protocol_version;
-    
+
     let txs_list: Vec<BlockTx> = txs.iter().take(visible_count_val).cloned().collect();
     let txs_list_for_desktop = txs_list.clone();
     let txs_list_for_mobile = txs_list.clone();
@@ -163,7 +167,10 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                     div {
                         dt { "Author" }
                         dd {
-                            account_id { account_id: author_id_val.clone(), network: network_val }
+                            account_id {
+                                account_id: author_id_val.clone(),
+                                network: network_val,
+                            }
                         }
                     }
                     // Epoch ID
@@ -210,7 +217,10 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                     div {
                         dt { "Tokens Burnt" }
                         dd {
-                            near_amount { yocto_near: tokens_burnt_val.clone(), show_price: true }
+                            near_amount {
+                                yocto_near: tokens_burnt_val.clone(),
+                                show_price: true,
+                            }
                         }
                     }
                     // Chunks
@@ -229,10 +239,8 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
             // Transactions
             if !txs_list.is_empty() {
                 div {
-                    h2 { class: "section-heading",
-                        "Transactions ({num_transactions_val})"
-                    }
-                    
+                    h2 { class: "section-heading", "Transactions ({num_transactions_val})" }
+
                     // Desktop table
                     div { class: "table-container",
                         table {
@@ -250,16 +258,25 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                                 for tx in txs_list_for_desktop {
                                     tr {
                                         td {
-                                            transaction_hash { hash: tx.transaction_hash.clone(), network: network_val }
+                                            transaction_hash {
+                                                hash: tx.transaction_hash.clone(),
+                                                network: network_val,
+                                            }
                                         }
                                         td { class: "text-gray-500",
                                             time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                         }
                                         td {
-                                            account_id { account_id: tx.signer_id.clone(), network: network_val }
+                                            account_id {
+                                                account_id: tx.signer_id.clone(),
+                                                network: network_val,
+                                            }
                                         }
                                         td {
-                                            account_id { account_id: tx.receiver_id.clone(), network: network_val }
+                                            account_id {
+                                                account_id: tx.receiver_id.clone(),
+                                                network: network_val,
+                                            }
                                         }
                                         td { class: "text-right",
                                             gas_amount { gas: tx.gas_burnt }
@@ -283,7 +300,10 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                             div {
                                 div { class: "flex items-center justify-between gap-2 mb-1",
                                     span { class: "font-mono text-xs truncate",
-                                        transaction_hash { hash: tx.transaction_hash.clone(), network: network_val }
+                                        transaction_hash {
+                                            hash: tx.transaction_hash.clone(),
+                                            network: network_val,
+                                        }
                                     }
                                     if tx.is_success {
                                         span { class: "status-success text-xs", "✓" }
@@ -295,9 +315,15 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                                     time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                 }
                                 div { class: "text-sm",
-                                    account_id { account_id: tx.signer_id.clone(), network: network_val }
+                                    account_id {
+                                        account_id: tx.signer_id.clone(),
+                                        network: network_val,
+                                    }
                                     " → "
-                                    account_id { account_id: tx.receiver_id.clone(), network: network_val }
+                                    account_id {
+                                        account_id: tx.receiver_id.clone(),
+                                        network: network_val,
+                                    }
                                 }
                             }
                         }
@@ -306,11 +332,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                     // Load more button
                     if has_more_val {
                         div { class: "load-more-container",
-                            button {
-                                onclick: load_more,
-                                class: "load-more-button",
-                                "Show More"
-                            }
+                            button { onclick: load_more, class: "load-more-button", "Show More" }
                         }
                     }
                 }

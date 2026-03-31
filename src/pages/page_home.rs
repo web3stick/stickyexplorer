@@ -2,12 +2,12 @@
 // =========================================
 // Home page - Latest blocks list with infinite scroll
 // =========================================
-use dioxus::prelude::*;
-use reqwest::Client;
-use serde::Serialize;
 use crate::api::types::BlockHeader;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago};
 use crate::logic::network::get_stored_network_id;
+use dioxus::prelude::*;
+use reqwest::Client;
+use serde::Serialize;
 // =========================================
 
 const BATCH_SIZE: u32 = 80;
@@ -40,7 +40,7 @@ pub fn Home() -> Element {
         spawn(async move {
             loading.set(true);
             error.set(None);
-            
+
             let client = Client::new();
             let params = BlocksParams {
                 limit: BATCH_SIZE,
@@ -62,7 +62,7 @@ pub fn Home() -> Element {
                                 .iter()
                                 .filter_map(|v| serde_json::from_value(v.clone()).ok())
                                 .collect();
-                            
+
                             if !new_blocks.is_empty() {
                                 if let Some(last) = new_blocks.last() {
                                     resume_token.set(Some(last.block_height.saturating_sub(1)));
@@ -86,7 +86,7 @@ pub fn Home() -> Element {
         if !has_more() || loading_more() {
             return;
         }
-        
+
         let api_base = api_base.to_string();
         let token = resume_token();
         loading_more.set(true);
@@ -112,15 +112,15 @@ pub fn Home() -> Element {
                             .iter()
                             .filter_map(|v| serde_json::from_value(v.clone()).ok())
                             .collect();
-                        
+
                         if new_blocks.is_empty() || new_blocks.len() < BATCH_SIZE as usize {
                             has_more.set(false);
                         }
-                        
+
                         if let Some(last) = new_blocks.last() {
                             resume_token.set(Some(last.block_height.saturating_sub(1)));
                         }
-                        
+
                         blocks.write().extend(new_blocks);
                     }
                 }
@@ -191,7 +191,9 @@ pub fn Home() -> Element {
                         }
                         div { class: "flex items-center justify-between gap-2",
                             account_id { account_id: block.author_id.clone() }
-                            span { class: "text-xs text-gray-500 shrink-0", "{block.num_transactions} txns" }
+                            span { class: "text-xs text-gray-500 shrink-0",
+                                "{block.num_transactions} txns"
+                            }
                         }
                     }
                 }
@@ -208,7 +210,11 @@ pub fn Home() -> Element {
                         onclick: load_more,
                         disabled: loading_more(),
                         class: "load-more-button",
-                        if loading_more() { "Loading..." } else { "Load More" }
+                        if loading_more() {
+                            "Loading..."
+                        } else {
+                            "Load More"
+                        }
                     }
                 }
             }

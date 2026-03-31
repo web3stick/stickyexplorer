@@ -2,14 +2,14 @@
 // =========================================
 // Account detail page with transactions
 // =========================================
-use dioxus::prelude::*;
-use reqwest::Client;
-use serde::Serialize;
 use crate::api::types::{AccountFilters, AccountTx};
 use crate::components::ui::{time_ago, transaction_hash};
 use crate::logic::network::NetworkId;
 use crate::logic::tx_cache::TxCache;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
+use dioxus::prelude::*;
+use reqwest::Client;
+use serde::Serialize;
 // =========================================
 
 const BATCH_SIZE: u32 = 80;
@@ -34,7 +34,7 @@ struct TxParams {
 pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
     let api_base = network.api_base_url();
     let network_val = network;
-    
+
     // State
     let mut txs = use_signal(|| Vec::<AccountTx>::new());
     let mut parsed_txs = use_signal(|| Vec::<(String, ParsedTx)>::new());
@@ -43,13 +43,13 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
     let mut resume_token = use_signal(|| Option::<String>::None);
     let mut has_more = use_signal(|| true);
     let mut txs_count = use_signal(|| 0u64);
-    
+
     // Global cache for faster navigation
     let tx_cache = use_signal(|| TxCache::new());
-    
+
     // Track current account to detect changes
     let mut current_account = use_signal(|| String::new());
-    
+
     // Fetch data when account_id changes
     if current_account() != account_id {
         current_account.set(account_id.clone());
@@ -60,11 +60,11 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
         txs.set(Vec::new());
         parsed_txs.set(Vec::new());
         txs_count.set(0);
-        
+
         let api_base = api_base.to_string();
         let account_id = account_id.clone();
         let mut tx_cache = tx_cache.clone();
-        
+
         spawn(async move {
             let client = Client::new();
             let filters = AccountFilters::default();
@@ -83,20 +83,29 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
             {
                 Ok(resp) => {
                     if let Ok(data) = resp.json::<serde_json::Value>().await {
-                        if let Some(account_txs) = data.get("account_txs").and_then(|v| v.as_array()) {
+                        if let Some(account_txs) =
+                            data.get("account_txs").and_then(|v| v.as_array())
+                        {
                             let new_txs: Vec<AccountTx> = account_txs
                                 .iter()
                                 .filter_map(|v| serde_json::from_value(v.clone()).ok())
                                 .collect();
-                            
+
                             let count = data.get("txs_count").and_then(|v| v.as_u64()).unwrap_or(0);
-                            let token = data.get("resume_token").and_then(|v| v.as_str()).map(String::from);
-                            let has_more_txs = token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
-                            
+                            let token = data
+                                .get("resume_token")
+                                .and_then(|v| v.as_str())
+                                .map(String::from);
+                            let has_more_txs =
+                                token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
+
                             // Fetch full transaction details (with caching)
-                            let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
-                            let parsed = fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache).await;
-                            
+                            let hashes: Vec<String> =
+                                new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
+                            let parsed =
+                                fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache)
+                                    .await;
+
                             txs.set(new_txs);
                             parsed_txs.set(parsed);
                             txs_count.set(count);
@@ -110,26 +119,26 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
             loading.set(false);
         });
     }
-    
+
     // Load more handler
     let account_id_for_load_more = account_id.clone();
     let load_more = move |_| {
         if loading_more() || !has_more() {
             return;
         }
-        
+
         let api_base = api_base.to_string();
         let account_id = account_id_for_load_more.clone();
         let token = resume_token();
         loading_more.set(true);
-        
+
         let mut tx_cache = tx_cache.clone();
         let mut txs_write = txs.clone();
         let mut parsed_txs_write = parsed_txs.clone();
         let mut resume_token_write = resume_token.clone();
         let mut has_more_write = has_more.clone();
         let mut loading_more_write = loading_more.clone();
-        
+
         spawn(async move {
             let client = Client::new();
             let filters = AccountFilters::default();
@@ -148,19 +157,28 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
             {
                 Ok(resp) => {
                     if let Ok(data) = resp.json::<serde_json::Value>().await {
-                        if let Some(account_txs) = data.get("account_txs").and_then(|v| v.as_array()) {
+                        if let Some(account_txs) =
+                            data.get("account_txs").and_then(|v| v.as_array())
+                        {
                             let new_txs: Vec<AccountTx> = account_txs
                                 .iter()
                                 .filter_map(|v| serde_json::from_value(v.clone()).ok())
                                 .collect();
-                            
-                            let token = data.get("resume_token").and_then(|v| v.as_str()).map(String::from);
-                            let has_more_txs = token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
-                            
+
+                            let token = data
+                                .get("resume_token")
+                                .and_then(|v| v.as_str())
+                                .map(String::from);
+                            let has_more_txs =
+                                token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
+
                             // Fetch full transaction details (with caching)
-                            let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
-                            let parsed = fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache).await;
-                            
+                            let hashes: Vec<String> =
+                                new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
+                            let parsed =
+                                fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache)
+                                    .await;
+
                             txs_write.write().extend(new_txs);
                             parsed_txs_write.write().extend(parsed);
                             resume_token_write.set(token);
@@ -173,7 +191,7 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
             loading_more_write.set(false);
         });
     };
-    
+
     // Read state
     let loading_val = loading();
     let loading_more_val = loading_more();
@@ -183,13 +201,13 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
     let txs_count_val = txs_count();
     let txs_list_empty = txs_list.is_empty();
     let account_id_display = account_id.clone();
-    
+
     if loading_val {
         return rsx! {
             div { class: "empty-state", "Loading {account_id_display}..." }
         };
     }
-    
+
     let parsed_map: std::collections::HashMap<String, ParsedTx> = parsed_list.into_iter().collect();
     let txs_list_for_display = txs_list.clone();
 
@@ -201,9 +219,7 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
             }
 
             if txs_count_val > 0 {
-                p { class: "mb-3 text-sm text-gray-600",
-                    "Transactions ({txs_count_val})"
-                }
+                p { class: "mb-3 text-sm text-gray-600", "Transactions ({txs_count_val})" }
             }
 
             // Desktop table
@@ -224,7 +240,10 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                             if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
                                 tr {
                                     td {
-                                        transaction_hash { hash: atx.transaction_hash.clone(), network: network_val }
+                                        transaction_hash {
+                                            hash: atx.transaction_hash.clone(),
+                                            network: network_val,
+                                        }
                                     }
                                     td { class: "text-gray-500",
                                         time_ago { timestamp_ns: atx.tx_block_timestamp.clone() }
@@ -273,7 +292,10 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                         div {
                             div { class: "flex items-center justify-between gap-2 mb-1",
                                 span { class: "font-mono text-xs",
-                                    transaction_hash { hash: atx.transaction_hash.clone(), network: network_val }
+                                    transaction_hash {
+                                        hash: atx.transaction_hash.clone(),
+                                        network: network_val,
+                                    }
                                 }
                                 if let Some(success) = parsed.is_success {
                                     if success {
@@ -328,7 +350,11 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                         onclick: load_more,
                         disabled: loading_more_val,
                         class: "load-more-button",
-                        if loading_more_val { "Loading..." } else { "Load More" }
+                        if loading_more_val {
+                            "Loading..."
+                        } else {
+                            "Load More"
+                        }
                     }
                 }
             }
@@ -336,15 +362,19 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
     }
 }
 
-async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], tx_cache: &mut Signal<TxCache>) -> Vec<(String, ParsedTx)> {
+async fn fetch_and_parse_transactions(
+    api_base: &str,
+    hashes: &[String],
+    tx_cache: &mut Signal<TxCache>,
+) -> Vec<(String, ParsedTx)> {
     if hashes.is_empty() {
         return Vec::new();
     }
-    
+
     // First check cache for existing transactions
     let mut all_parsed = Vec::new();
     let mut missing_hashes = Vec::new();
-    
+
     for hash in hashes {
         if let Some(parsed) = tx_cache.read().get(hash) {
             all_parsed.push((hash.clone(), parsed.clone()));
@@ -352,21 +382,21 @@ async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], tx_cach
             missing_hashes.push(hash.clone());
         }
     }
-    
+
     // If we have all in cache, return early
     if missing_hashes.is_empty() {
         return all_parsed;
     }
-    
+
     const BATCH_SIZE: usize = 20;
-    
+
     // Process missing in batches to avoid API limits
     for chunk in missing_hashes.chunks(BATCH_SIZE) {
         let client = Client::new();
         let params = TxParams {
             tx_hashes: chunk.to_vec(),
         };
-        
+
         match client
             .post(format!("{}/v0/transactions", api_base))
             .json(&params)
@@ -379,14 +409,17 @@ async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], tx_cach
                         let parsed: Vec<(String, ParsedTx)> = tx_array
                             .iter()
                             .filter_map(|v| {
-                                serde_json::from_value::<crate::api::types::TransactionDetail>(v.clone()).ok()
+                                serde_json::from_value::<crate::api::types::TransactionDetail>(
+                                    v.clone(),
+                                )
+                                .ok()
                             })
                             .map(|tx| {
                                 let parsed = parse_transaction(&tx);
                                 (parsed.hash.clone(), parsed.clone())
                             })
                             .collect();
-                        
+
                         // Add to cache
                         tx_cache.write().insert_batch(parsed.clone());
                         all_parsed.extend(parsed);
@@ -395,11 +428,11 @@ async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String], tx_cach
             }
             Err(_) => {}
         }
-        
+
         // Small delay between batches to avoid rate limiting
         gloo_timers::future::TimeoutFuture::new(50).await;
     }
-    
+
     all_parsed
 }
 // =========================================

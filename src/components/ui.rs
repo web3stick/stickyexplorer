@@ -2,19 +2,27 @@
 // =========================================
 // Shared UI components for NEAR Explorer
 // =========================================
-use dioxus::prelude::*;
-use crate::utils::format::{format_gas_amount, format_near_amount, format_time_ago, truncate_middle};
 use crate::logic::network::NetworkId;
+use crate::utils::format::{
+    format_gas_amount, format_near_amount, format_time_ago, truncate_middle,
+};
+use dioxus::prelude::*;
 // =========================================
 
 /// Account ID display component
 #[component]
-pub fn account_id(account_id: String, #[props(default)] max_length: Option<usize>, #[props(default)] network: Option<NetworkId>) -> Element {
+pub fn account_id(
+    account_id: String,
+    #[props(default)] max_length: Option<usize>,
+    #[props(default)] network: Option<NetworkId>,
+) -> Element {
     let display = max_length
         .map(|len| truncate_middle(&account_id, len))
         .unwrap_or_else(|| account_id.clone());
-    
-    let network_prefix = network.map(|n| format!("{}/", n.as_str())).unwrap_or_else(|| "mainnet/".to_string());
+
+    let network_prefix = network
+        .map(|n| format!("{}/", n.as_str()))
+        .unwrap_or_else(|| "mainnet/".to_string());
 
     rsx! {
         Link {
@@ -27,14 +35,20 @@ pub fn account_id(account_id: String, #[props(default)] max_length: Option<usize
 
 /// Transaction hash display component
 #[component]
-pub fn transaction_hash(hash: String, #[props(default)] truncate: Option<bool>, #[props(default)] network: Option<NetworkId>) -> Element {
+pub fn transaction_hash(
+    hash: String,
+    #[props(default)] truncate: Option<bool>,
+    #[props(default)] network: Option<NetworkId>,
+) -> Element {
     let display = if truncate.unwrap_or(true) {
         truncate_middle(&hash, 12)
     } else {
         hash.clone()
     };
-    
-    let network_prefix = network.map(|n| format!("{}/", n.as_str())).unwrap_or_else(|| "mainnet/".to_string());
+
+    let network_prefix = network
+        .map(|n| format!("{}/", n.as_str()))
+        .unwrap_or_else(|| "mainnet/".to_string());
 
     rsx! {
         Link {
@@ -48,8 +62,10 @@ pub fn transaction_hash(hash: String, #[props(default)] truncate: Option<bool>, 
 /// Block height display component
 #[component]
 pub fn block_height(height: u64, #[props(default)] network: Option<NetworkId>) -> Element {
-    let network_prefix = network.map(|n| format!("{}/", n.as_str())).unwrap_or_else(|| "mainnet/".to_string());
-    
+    let network_prefix = network
+        .map(|n| format!("{}/", n.as_str()))
+        .unwrap_or_else(|| "mainnet/".to_string());
+
     rsx! {
         Link {
             to: format!("/{network_prefix}block/{}", height),
@@ -63,10 +79,7 @@ pub fn block_height(height: u64, #[props(default)] network: Option<NetworkId>) -
 #[component]
 pub fn block_hash(hash: String) -> Element {
     rsx! {
-        span {
-            class: "font-mono text-sm",
-            "{truncate_middle(&hash, 12)}"
-        }
+        span { class: "font-mono text-sm", "{truncate_middle(&hash, 12)}" }
     }
 }
 
@@ -74,10 +87,7 @@ pub fn block_hash(hash: String) -> Element {
 #[component]
 pub fn time_ago(timestamp_ns: String) -> Element {
     rsx! {
-        span {
-            class: "text-gray-500 text-sm",
-            "{format_time_ago(&timestamp_ns)}"
-        }
+        span { class: "text-gray-500 text-sm", "{format_time_ago(&timestamp_ns)}" }
     }
 }
 
@@ -85,10 +95,7 @@ pub fn time_ago(timestamp_ns: String) -> Element {
 #[component]
 pub fn gas_amount(gas: u64) -> Element {
     rsx! {
-        span {
-            class: "font-mono text-xs",
-            "{format_gas_amount(gas)}"
-        }
+        span { class: "font-mono text-xs", "{format_gas_amount(gas)}" }
     }
 }
 
@@ -98,14 +105,15 @@ pub fn near_amount(yocto_near: String, #[props(default)] show_price: Option<bool
     let formatted = format_near_amount(&yocto_near);
     let price_display = if show_price.unwrap_or(false) {
         let price = formatted.parse::<f64>().unwrap_or(0.0) * 5.0;
-        rsx! { span { class: "text-gray-500", " (~${price:.2})" } }
+        rsx! {
+            span { class: "text-gray-500", " (~${price:.2})" }
+        }
     } else {
         rsx! {}
     };
-    
+
     rsx! {
-        span {
-            class: "font-mono text-sm",
+        span { class: "font-mono text-sm",
             "{formatted} NEAR"
             {price_display}
         }
