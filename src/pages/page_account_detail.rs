@@ -39,6 +39,9 @@ pub fn AccountDetail(account_id: String) -> Element {
     let mut txs = use_signal(|| Vec::<AccountTx>::new());
     let mut parsed_txs = use_signal(|| Vec::<(String, ParsedTx)>::new());
     let mut loading = use_signal(|| true);
+    let mut loading_more = use_signal(|| false);
+    let mut resume_token = use_signal(|| Option::<String>::None);
+    let mut has_more = use_signal(|| true);
     let mut txs_count = use_signal(|| 0u64);
     
     // Global cache for faster navigation
@@ -51,6 +54,9 @@ pub fn AccountDetail(account_id: String) -> Element {
     if current_account() != account_id {
         current_account.set(account_id.clone());
         loading.set(true);
+        loading_more.set(false);
+        resume_token.set(None);
+        has_more.set(true);
         txs.set(Vec::new());
         parsed_txs.set(Vec::new());
         txs_count.set(0);
@@ -84,6 +90,8 @@ pub fn AccountDetail(account_id: String) -> Element {
                                 .collect();
                             
                             let count = data.get("txs_count").and_then(|v| v.as_u64()).unwrap_or(0);
+                            let token = data.get("resume_token").and_then(|v| v.as_str()).map(String::from);
+                            let has_more_txs = token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
                             
                             // Fetch full transaction details (with caching)
                             let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
@@ -92,6 +100,8 @@ pub fn AccountDetail(account_id: String) -> Element {
                             txs.set(new_txs);
                             parsed_txs.set(parsed);
                             txs_count.set(count);
+                            resume_token.set(token);
+                            has_more.set(has_more_txs);
                         }
                     }
                 }
@@ -101,16 +111,82 @@ pub fn AccountDetail(account_id: String) -> Element {
         });
     }
     
+    // Load more handler
+    let account_id_for_load_more = account_id.clone();
+    let load_more = move |_| {
+        if loading_more() || !has_more() {
+            return;
+        }
+        
+        let api_base = api_base.to_string();
+        let account_id = account_id_for_load_more.clone();
+        let token = resume_token();
+        loading_more.set(true);
+        
+        let mut tx_cache = tx_cache.clone();
+        let mut txs_write = txs.clone();
+        let mut parsed_txs_write = parsed_txs.clone();
+        let mut resume_token_write = resume_token.clone();
+        let mut has_more_write = has_more.clone();
+        let mut loading_more_write = loading_more.clone();
+        
+        spawn(async move {
+            let client = Client::new();
+            let filters = AccountFilters::default();
+            let params = AccountParams {
+                account_id: &account_id,
+                filters: &filters,
+                resume_token: token.as_deref(),
+                limit: Some(BATCH_SIZE),
+            };
+
+            match client
+                .post(format!("{}/v0/account", api_base))
+                .json(&params)
+                .send()
+                .await
+            {
+                Ok(resp) => {
+                    if let Ok(data) = resp.json::<serde_json::Value>().await {
+                        if let Some(account_txs) = data.get("account_txs").and_then(|v| v.as_array()) {
+                            let new_txs: Vec<AccountTx> = account_txs
+                                .iter()
+                                .filter_map(|v| serde_json::from_value(v.clone()).ok())
+                                .collect();
+                            
+                            let token = data.get("resume_token").and_then(|v| v.as_str()).map(String::from);
+                            let has_more_txs = token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
+                            
+                            // Fetch full transaction details (with caching)
+                            let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
+                            let parsed = fetch_and_parse_transactions(&api_base, &hashes, &mut tx_cache).await;
+                            
+                            txs_write.write().extend(new_txs);
+                            parsed_txs_write.write().extend(parsed);
+                            resume_token_write.set(token);
+                            has_more_write.set(has_more_txs);
+                        }
+                    }
+                }
+                Err(_) => {}
+            }
+            loading_more_write.set(false);
+        });
+    };
+    
     // Read state
     let loading_val = loading();
+    let loading_more_val = loading_more();
+    let has_more_val = has_more();
     let txs_list = txs();
     let parsed_list = parsed_txs();
     let txs_count_val = txs_count();
     let txs_list_empty = txs_list.is_empty();
+    let account_id_display = account_id.clone();
     
     if loading_val {
         return rsx! {
-            div { class: "empty-state", "Loading {account_id}..." }
+            div { class: "empty-state", "Loading {account_id_display}..." }
         };
     }
     
@@ -121,7 +197,7 @@ pub fn AccountDetail(account_id: String) -> Element {
         div {
             h1 { class: "mb-4 text-xl font-bold",
                 "Account: "
-                span { class: "font-mono text-base", "{account_id}" }
+                span { class: "font-mono text-base", "{account_id_display}" }
             }
 
             if txs_count_val > 0 {
@@ -243,6 +319,18 @@ pub fn AccountDetail(account_id: String) -> Element {
 
             if txs_list_empty {
                 p { class: "empty-state", "No transactions found" }
+            }
+
+            // Load more button
+            if has_more_val && !loading_val {
+                div { class: "load-more-container",
+                    button {
+                        onclick: load_more,
+                        disabled: loading_more_val,
+                        class: "load-more-button",
+                        if loading_more_val { "Loading..." } else { "Load More" }
+                    }
+                }
             }
         }
     }
