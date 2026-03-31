@@ -4,18 +4,21 @@
 // =========================================
 use dioxus::prelude::*;
 use crate::utils::format::{format_gas_amount, format_near_amount, format_time_ago, truncate_middle};
+use crate::logic::network::NetworkId;
 // =========================================
 
 /// Account ID display component
 #[component]
-pub fn account_id(account_id: String, #[props(default)] max_length: Option<usize>) -> Element {
+pub fn account_id(account_id: String, #[props(default)] max_length: Option<usize>, #[props(default)] network: Option<NetworkId>) -> Element {
     let display = max_length
         .map(|len| truncate_middle(&account_id, len))
         .unwrap_or_else(|| account_id.clone());
+    
+    let network_prefix = network.map(|n| format!("{}/", n.as_str())).unwrap_or_else(|| "mainnet/".to_string());
 
     rsx! {
         Link {
-            to: format!("/account/{}", account_id),
+            to: format!("/{network_prefix}account/{}", account_id),
             class: "font-mono text-sm hover:underline",
             "{display}"
         }
@@ -24,16 +27,18 @@ pub fn account_id(account_id: String, #[props(default)] max_length: Option<usize
 
 /// Transaction hash display component
 #[component]
-pub fn transaction_hash(hash: String, #[props(default)] truncate: Option<bool>) -> Element {
+pub fn transaction_hash(hash: String, #[props(default)] truncate: Option<bool>, #[props(default)] network: Option<NetworkId>) -> Element {
     let display = if truncate.unwrap_or(true) {
         truncate_middle(&hash, 12)
     } else {
         hash.clone()
     };
+    
+    let network_prefix = network.map(|n| format!("{}/", n.as_str())).unwrap_or_else(|| "mainnet/".to_string());
 
     rsx! {
         Link {
-            to: format!("/tx/{}", hash),
+            to: format!("/{network_prefix}tx/{}", hash),
             class: "font-mono text-sm hover:underline",
             "{display}"
         }
@@ -42,10 +47,12 @@ pub fn transaction_hash(hash: String, #[props(default)] truncate: Option<bool>) 
 
 /// Block height display component
 #[component]
-pub fn block_height(height: u64) -> Element {
+pub fn block_height(height: u64, #[props(default)] network: Option<NetworkId>) -> Element {
+    let network_prefix = network.map(|n| format!("{}/", n.as_str())).unwrap_or_else(|| "mainnet/".to_string());
+    
     rsx! {
         Link {
-            to: format!("/block/{}", height),
+            to: format!("/{network_prefix}block/{}", height),
             class: "font-mono text-sm hover:underline",
             "{height}"
         }

@@ -25,6 +25,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
     let mut error = use_signal(|| Option::<String>::None);
 
     let api_base = network.api_base_url();
+    let network_val = network;
 
     use_effect(move || {
         let api_base = api_base.to_string();
@@ -97,28 +98,28 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                     div { class: "sm:col-span-2",
                         dt { "Hash" }
                         dd { class: "break-all",
-                            transaction_hash { hash: ptx.hash.clone(), truncate: false }
+                            transaction_hash { hash: ptx.hash.clone(), truncate: false, network: network_val }
                         }
                     }
                     // Signer
                     div {
                         dt { "Signer" }
                         dd {
-                            account_id { account_id: ptx.signer_id.clone() }
+                            account_id { account_id: ptx.signer_id.clone(), network: network_val }
                         }
                     }
                     // Receiver
                     div {
                         dt { "Receiver" }
                         dd {
-                            account_id { account_id: ptx.receiver_id.clone() }
+                            account_id { account_id: ptx.receiver_id.clone(), network: network_val }
                         }
                     }
                     // Block
                     div {
                         dt { "Block" }
                         dd {
-                            block_height { height: ptx.block_height }
+                            block_height { height: ptx.block_height, network: network_val }
                         }
                     }
                     // Time
@@ -213,11 +214,11 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                                 div { class: "receipt-grid",
                                     div {
                                         span { class: "text-gray-500", "From: " }
-                                        account_id { account_id: receipt.receipt.predecessor_id.clone() }
+                                        account_id { account_id: receipt.receipt.predecessor_id.clone(), network: network_val }
                                     }
                                     div {
                                         span { class: "text-gray-500", "To: " }
-                                        account_id { account_id: receipt.receipt.receiver_id.clone() }
+                                        account_id { account_id: receipt.receipt.receiver_id.clone(), network: network_val }
                                     }
                                     div {
                                         span { class: "text-gray-500", "Gas: " }

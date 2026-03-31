@@ -33,6 +33,7 @@ struct TxParams {
 #[component]
 pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
     let api_base = network.api_base_url();
+    let network_val = network;
     
     // State
     let mut txs = use_signal(|| Vec::<AccountTx>::new());
@@ -223,7 +224,7 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                             if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
                                 tr {
                                     td {
-                                        transaction_hash { hash: atx.transaction_hash.clone() }
+                                        transaction_hash { hash: atx.transaction_hash.clone(), network: network_val }
                                     }
                                     td { class: "text-gray-500",
                                         time_ago { timestamp_ns: atx.tx_block_timestamp.clone() }
@@ -272,7 +273,7 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                         div {
                             div { class: "flex items-center justify-between gap-2 mb-1",
                                 span { class: "font-mono text-xs",
-                                    transaction_hash { hash: atx.transaction_hash.clone() }
+                                    transaction_hash { hash: atx.transaction_hash.clone(), network: network_val }
                                 }
                                 if let Some(success) = parsed.is_success {
                                     if success {

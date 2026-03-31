@@ -110,6 +110,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
     let txs_list_for_desktop = txs_list.clone();
     let txs_list_for_mobile = txs_list.clone();
     let has_more_val = has_more;
+    let network_val = network;
 
     rsx! {
         div {
@@ -142,7 +143,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                     div {
                         dt { "Author" }
                         dd {
-                            account_id { account_id: author_id_val.clone() }
+                            account_id { account_id: author_id_val.clone(), network: network_val }
                         }
                     }
                     // Epoch ID
@@ -155,7 +156,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                         dt { "Prev Block" }
                         dd {
                             if let Some(prev_height) = prev_block_height_val {
-                                block_height { height: prev_height }
+                                block_height { height: prev_height, network: network_val }
                             } else {
                                 block_hash { hash: prev_block_hash_val.clone() }
                             }
@@ -229,16 +230,16 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                                 for tx in txs_list_for_desktop {
                                     tr {
                                         td {
-                                            transaction_hash { hash: tx.transaction_hash.clone() }
+                                            transaction_hash { hash: tx.transaction_hash.clone(), network: network_val }
                                         }
                                         td { class: "text-gray-500",
                                             time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                         }
                                         td {
-                                            account_id { account_id: tx.signer_id.clone() }
+                                            account_id { account_id: tx.signer_id.clone(), network: network_val }
                                         }
                                         td {
-                                            account_id { account_id: tx.receiver_id.clone() }
+                                            account_id { account_id: tx.receiver_id.clone(), network: network_val }
                                         }
                                         td { class: "text-right",
                                             gas_amount { gas: tx.gas_burnt }
@@ -262,7 +263,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                             div {
                                 div { class: "flex items-center justify-between gap-2 mb-1",
                                     span { class: "font-mono text-xs truncate",
-                                        transaction_hash { hash: tx.transaction_hash.clone() }
+                                        transaction_hash { hash: tx.transaction_hash.clone(), network: network_val }
                                     }
                                     if tx.is_success {
                                         span { class: "status-success text-xs", "✓" }
@@ -274,9 +275,9 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                                     time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                 }
                                 div { class: "text-sm",
-                                    account_id { account_id: tx.signer_id.clone() }
+                                    account_id { account_id: tx.signer_id.clone(), network: network_val }
                                     " → "
-                                    account_id { account_id: tx.receiver_id.clone() }
+                                    account_id { account_id: tx.receiver_id.clone(), network: network_val }
                                 }
                             }
                         }
