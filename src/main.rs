@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use stickyexplorer::pages::route::Route;
 // =========================================
-const FAVICON: Asset = asset!("/assets/favicon.ico");
+const FAVICON: Asset = asset!("/assets/web_icon.svg");
 const MAIN_CSS: Asset = asset!("/assets/css/main.css");
 // =========================================
 fn main() {
