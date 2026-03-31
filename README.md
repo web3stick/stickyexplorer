@@ -1,25 +1,41 @@
-# Development
+# stickyexplorer
+fast near blockchain explorer using fastnear explorer api and dioxus ui
 
-Your new bare-bones project includes minimal organization with a single `main.rs` file and a few assets.
+---
 
-```
-project/
-├─ assets/ # Any assets that are used by the app should be placed here
-├─ src/
-│  ├─ main.rs # main.rs is the entry point to your application and currently contains all components for the app
-├─ Cargo.toml # The Cargo.toml file defines the dependencies and feature flags for your project
-```
+### Dev and Build
 
-### Serving Your App
-
-Run the following command in the root of your project to start developing with the default platform:
-
-```bash
+```sh
+# dx
+dx check
+dx fmt
+# serve
 dx serve
+dx serve --platform web
+# dx serve --platform desktop
+# bundle
+dx bundle --platform web
+dx bundle --release
+# dx bundle --platform desktop
+
+# CARGO COMMANDS
+# cargo run
+cargo check
+cargo test
+cargo clean
+cargo check --target wasm32-unknown-unknown
+cargo fmt
+cargo update
+
+
+# netlify
+# stickyexplorer
+netlify deploy
+netlify deploy --prod
 ```
 
-To run for a different platform, use the `--platform platform` flag. E.g.
-```bash
-dx serve --platform desktop
-```
 
+
+---
+
+copyright 2026 by sleet.near
