@@ -208,22 +208,55 @@
 /* =========================================
    JSON Container
    ========================================= */
+.json-toggle-button {
+    display: flex;
+    width: 100%;
+    cursor: pointer;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.json-toggle-button:hover {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+.json-wrapper {
+    padding: 24px;
+}
+
 .json-container {
     background-color: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
-    padding: 12px 16px;
+    padding: 16px;
     max-width: 100%;
+    max-height: 300px;
     overflow: auto;
 }
 
 .json-container pre {
     margin: 0;
     font-size: 0.75rem;
-    line-height: 1.5;
+    line-height: 1.6;
     font-family: 'Courier New', Courier, monospace;
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
+}
+
+/* =========================================
+   Widget Padding
+   ========================================= */
+.widget-transfer-content {
+    padding: 16px;
 }

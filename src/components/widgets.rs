@@ -52,8 +52,8 @@ pub fn render_ft_transfer(tx: &TransactionDetail) -> Element {
 
     rsx! {
         div {
-            class: "mb-4 rounded-lg border {status_class} p-4",
-            div { class: "flex flex-col gap-1",
+            class: "mb-4 rounded-lg border {status_class}",
+            div { class: "widget-transfer-content flex flex-col gap-1",
                 span { class: "font-medium text-sm", "Token Transfer" }
                 for transfer in ft_transfers.iter() {
                     span { class: "flex flex-wrap items-center gap-1 text-sm",
@@ -96,8 +96,8 @@ pub fn render_near_transfer(tx: &TransactionDetail) -> Element {
 
     rsx! {
         div {
-            class: "mb-4 rounded-lg border {status_class} p-4",
-            div { class: "flex flex-col gap-1",
+            class: "mb-4 rounded-lg border {status_class}",
+            div { class: "widget-transfer-content flex flex-col gap-1",
                 span { class: "flex flex-wrap items-center gap-1",
                     account_id { account_id: parsed.signer_id.clone() }
                     span { class: "text-gray-500", "transferred" }
@@ -122,19 +122,16 @@ pub fn render_default_widget(tx: &TransactionDetail) -> Element {
             class: "mt-6 rounded-lg border border-gray-200 bg-white",
             button {
                 onclick: move |_| open.toggle(),
-                class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors",
+                class: "json-toggle-button",
                 span { "Raw JSON" }
             }
             if open() {
                 div {
-                    class: "border-t border-gray-100",
+                    class: "border-t border-gray-100 json-wrapper",
                     div {
-                        class: "p-4",
-                        div {
-                            class: "json-container",
-                            pre {
-                                "{tx_json}"
-                            }
+                        class: "json-container",
+                        pre {
+                            "{tx_json}"
                         }
                     }
                 }
