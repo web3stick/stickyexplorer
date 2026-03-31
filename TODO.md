@@ -9,7 +9,7 @@
 - [ ] more links "Signer	Receiver" should be links on the account page
 - [ ] in case of route errros redirect to home page?
 - [ ] add settings for light/dark mode and maybe other settings
-- [ ] 
+- [ ] transaction support for certain contracts, or maybe all?
 
 
 ---
