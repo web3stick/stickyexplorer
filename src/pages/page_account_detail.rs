@@ -8,6 +8,7 @@ use serde::Serialize;
 use crate::api::types::{AccountFilters, AccountTx};
 use crate::components::ui::{time_ago, transaction_hash};
 use crate::logic::network::get_stored_network_id;
+use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 // =========================================
 
 const BATCH_SIZE: u32 = 80;
@@ -23,9 +24,15 @@ struct AccountParams<'a> {
     limit: Option<u32>,
 }
 
+#[derive(Clone, Serialize)]
+struct TxParams {
+    tx_hashes: Vec<String>,
+}
+
 #[component]
 pub fn AccountDetail(account_id: String) -> Element {
     let mut txs = use_signal(|| Vec::<AccountTx>::new());
+    let mut parsed_txs = use_signal(|| Vec::<(String, ParsedTx)>::new());
     let mut loading = use_signal(|| true);
     let mut error = use_signal(|| Option::<String>::None);
     let mut resume_token = use_signal(|| Option::<String>::None);
@@ -82,7 +89,12 @@ pub fn AccountDetail(account_id: String) -> Element {
                             } else {
                                 has_more.set(false);
                             }
+                            
+                            // Fetch full transaction details
+                            let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
+                            let parsed = fetch_and_parse_transactions(&api_base, &hashes).await;
                             txs.set(new_txs);
+                            parsed_txs.set(parsed);
                         }
                     }
                 }
@@ -135,7 +147,12 @@ pub fn AccountDetail(account_id: String) -> Element {
                             resume_token.set(Some(resume.to_string()));
                         }
                         
+                        // Fetch full transaction details for new txs
+                        let hashes: Vec<String> = new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
+                        let parsed = fetch_and_parse_transactions(&api_base, &hashes).await;
+                        
                         txs.write().extend(new_txs);
+                        parsed_txs.write().extend(parsed);
                     }
                 }
             }
@@ -145,10 +162,15 @@ pub fn AccountDetail(account_id: String) -> Element {
 
     let txs_count_val = txs_count();
     let txs_list = txs();
+    let parsed_list = parsed_txs();
     let has_more_val = has_more();
     let loading_more_val = loading_more();
     let loading_val = loading();
     let error_val = error();
+    
+    // Create a map for quick lookup
+    let parsed_map: std::collections::HashMap<String, ParsedTx> = parsed_list.into_iter().collect();
+    
     let txs_list_for_desktop = txs_list.clone();
     let txs_list_for_mobile = txs_list.clone();
     let txs_list_empty = txs_list.is_empty();
@@ -186,42 +208,44 @@ pub fn AccountDetail(account_id: String) -> Element {
                         }
                     }
                     tbody {
-                        for tx in txs_list_for_desktop {
-                            tr {
-                                td {
-                                    transaction_hash { hash: tx.transaction_hash.clone() }
-                                }
-                                td { class: "text-gray-500",
-                                    time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
-                                }
-                                td {
-                                    if tx.is_signer || tx.is_real_signer {
-                                        span { class: "font-mono text-xs", "{account_id_display}" }
-                                    } else {
-                                        span { class: "text-gray-400 text-xs", "—" }
+                        for atx in txs_list_for_desktop {
+                            if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
+                                tr {
+                                    td {
+                                        transaction_hash { hash: atx.transaction_hash.clone() }
                                     }
-                                }
-                                td {
-                                    if tx.is_receiver || tx.is_real_receiver {
-                                        span { class: "font-mono text-xs", "{account_id_display}" }
-                                    } else {
-                                        span { class: "text-gray-400 text-xs", "—" }
+                                    td { class: "text-gray-500",
+                                        time_ago { timestamp_ns: atx.tx_block_timestamp.clone() }
                                     }
-                                }
-                                td {
-                                    if tx.is_function_call {
-                                        span { class: "text-xs", "Function Call" }
-                                    } else if tx.is_delegated_signer {
-                                        span { class: "text-xs", "Delegate" }
-                                    } else {
-                                        span { class: "text-xs text-gray-400", "Transfer" }
+                                    td {
+                                        span { class: "font-mono text-xs", "{parsed.signer_id}" }
                                     }
-                                }
-                                td {
-                                    if tx.is_success {
-                                        span { class: "status-success", "✓" }
-                                    } else {
-                                        span { class: "status-failed", "✗" }
+                                    td {
+                                        span { class: "font-mono text-xs", "{parsed.receiver_id}" }
+                                    }
+                                    td {
+                                        if let Some(first_action) = parsed.actions.first() {
+                                            span { class: "text-xs",
+                                                "{first_action.action_type}"
+                                                if let Some(ref method) = first_action.method_name {
+                                                    "::"
+                                                    "{method}"
+                                                }
+                                            }
+                                        } else {
+                                            span { class: "text-xs text-gray-400", "Unknown" }
+                                        }
+                                    }
+                                    td {
+                                        if let Some(success) = parsed.is_success {
+                                            if success {
+                                                span { class: "status-success", "✓" }
+                                            } else {
+                                                span { class: "status-failed", "✗" }
+                                            }
+                                        } else {
+                                            span { class: "status-pending", "⏳" }
+                                        }
                                     }
                                 }
                             }
@@ -232,46 +256,48 @@ pub fn AccountDetail(account_id: String) -> Element {
 
             // Mobile cards
             div { class: "mobile-cards",
-                for tx in txs_list_for_mobile {
-                    div {
-                        div { class: "flex items-center justify-between gap-2 mb-1",
-                            span { class: "font-mono text-xs",
-                                transaction_hash { hash: tx.transaction_hash.clone() }
-                            }
-                            if tx.is_success {
-                                span { class: "status-success text-xs", "✓" }
-                            } else {
-                                span { class: "status-failed text-xs", "✗" }
-                            }
-                        }
-                        div { class: "text-sm text-gray-500 mb-1",
-                            time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
-                        }
-                        div { class: "flex flex-col gap-1 text-sm",
-                            div {
-                                span { class: "text-gray-500 text-xs", "Signer: " }
-                                if tx.is_signer || tx.is_real_signer {
-                                    span { class: "font-mono text-xs", "{account_id_display}" }
+                for atx in txs_list_for_mobile {
+                    if let Some(parsed) = parsed_map.get(&atx.transaction_hash) {
+                        div {
+                            div { class: "flex items-center justify-between gap-2 mb-1",
+                                span { class: "font-mono text-xs",
+                                    transaction_hash { hash: atx.transaction_hash.clone() }
+                                }
+                                if let Some(success) = parsed.is_success {
+                                    if success {
+                                        span { class: "status-success text-xs", "✓" }
+                                    } else {
+                                        span { class: "status-failed text-xs", "✗" }
+                                    }
                                 } else {
-                                    span { class: "text-gray-400 text-xs", "—" }
+                                    span { class: "status-pending text-xs", "⏳" }
                                 }
                             }
-                            div {
-                                span { class: "text-gray-500 text-xs", "Receiver: " }
-                                if tx.is_receiver || tx.is_real_receiver {
-                                    span { class: "font-mono text-xs", "{account_id_display}" }
-                                } else {
-                                    span { class: "text-gray-400 text-xs", "—" }
-                                }
+                            div { class: "text-sm text-gray-500 mb-1",
+                                time_ago { timestamp_ns: atx.tx_block_timestamp.clone() }
                             }
-                            div {
-                                span { class: "text-gray-500 text-xs", "Action: " }
-                                if tx.is_function_call {
-                                    span { class: "text-xs", "Function Call" }
-                                } else if tx.is_delegated_signer {
-                                    span { class: "text-xs", "Delegate" }
-                                } else {
-                                    span { class: "text-xs text-gray-400", "Transfer" }
+                            div { class: "flex flex-col gap-1 text-sm",
+                                div {
+                                    span { class: "text-gray-500 text-xs", "Signer: " }
+                                    span { class: "font-mono text-xs", "{parsed.signer_id}" }
+                                }
+                                div {
+                                    span { class: "text-gray-500 text-xs", "Receiver: " }
+                                    span { class: "font-mono text-xs", "{parsed.receiver_id}" }
+                                }
+                                div {
+                                    span { class: "text-gray-500 text-xs", "Action: " }
+                                    if let Some(first_action) = parsed.actions.first() {
+                                        span { class: "text-xs",
+                                            "{first_action.action_type}"
+                                            if let Some(ref method) = first_action.method_name {
+                                                "::"
+                                                "{method}"
+                                            }
+                                        }
+                                    } else {
+                                        span { class: "text-xs text-gray-400", "Unknown" }
+                                    }
                                 }
                             }
                         }
@@ -296,6 +322,54 @@ pub fn AccountDetail(account_id: String) -> Element {
             }
         }
     }
+}
+
+async fn fetch_and_parse_transactions(api_base: &str, hashes: &[String]) -> Vec<(String, ParsedTx)> {
+    if hashes.is_empty() {
+        return Vec::new();
+    }
+    
+    const BATCH_SIZE: usize = 20;
+    let mut all_parsed = Vec::new();
+    
+    // Process in batches to avoid API limits
+    for chunk in hashes.chunks(BATCH_SIZE) {
+        let client = Client::new();
+        let params = TxParams {
+            tx_hashes: chunk.to_vec(),
+        };
+        
+        match client
+            .post(format!("{}/v0/transactions", api_base))
+            .json(&params)
+            .send()
+            .await
+        {
+            Ok(resp) => {
+                if let Ok(data) = resp.json::<serde_json::Value>().await {
+                    if let Some(tx_array) = data.get("transactions").and_then(|v| v.as_array()) {
+                        let parsed: Vec<(String, ParsedTx)> = tx_array
+                            .iter()
+                            .filter_map(|v| {
+                                serde_json::from_value::<crate::api::types::TransactionDetail>(v.clone()).ok()
+                            })
+                            .map(|tx| {
+                                let parsed = parse_transaction(&tx);
+                                (parsed.hash.clone(), parsed)
+                            })
+                            .collect();
+                        all_parsed.extend(parsed);
+                    }
+                }
+            }
+            Err(_) => {}
+        }
+        
+        // Small delay between batches to avoid rate limiting
+        gloo_timers::future::TimeoutFuture::new(100).await;
+    }
+    
+    all_parsed
 }
 // =========================================
 // copyright 2026 by sleet.near
