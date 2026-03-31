@@ -10,6 +10,7 @@
 - [ ] in case of route errros redirect to home page?
 - [ ] add settings for light/dark mode and maybe other settings
 - [ ] transaction support for certain contracts, or maybe all?
+- [ ] need to froce word line breaks when really long account id
 
 
 ---
