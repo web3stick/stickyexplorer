@@ -28,18 +28,18 @@ pub fn Navbar() -> Element {
     rsx! {
         header {
             id: "header",
-            class: "max-w-7xl mx-auto mb-6",
             div {
-                class: "flex flex-col sm:flex-row items-center gap-4 py-4 border-b border-gray-200 pb-4",
-                Link {
-                    to: Route::Home {},
-                    class: "text-xl font-bold hover:text-[#8CA2F5] transition-colors",
-                    "StickyExplorer"
+                div { class: "navbar-left",
+                    Link {
+                        to: Route::Home {},
+                        class: "logo",
+                        "StickyExplorer"
+                    }
+                    div { class: "flex-1",
+                        search_bar {}
+                    }
                 }
-                div { class: "flex-1 w-full sm:max-w-md",
-                    search_bar {}
-                }
-                div {
+                div { class: "navbar-right",
                     button_network {}
                 }
             }

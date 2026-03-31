@@ -173,33 +173,33 @@ pub fn AccountDetail(account_id: String) -> Element {
             }
 
             // Desktop table
-            div { class: "hidden sm:block overflow-x-auto rounded-lg border border-gray-200 bg-white",
-                table { class: "w-full text-sm",
+            div { class: "table-container",
+                table {
                     thead {
-                        tr { class: "border-b border-gray-200 bg-gray-50 text-left text-xs font-medium uppercase text-gray-500",
-                            th { class: "px-4 py-3", "Tx Hash" }
-                            th { class: "px-4 py-3", "Time" }
-                            th { class: "px-4 py-3", "Block" }
-                            th { class: "px-4 py-3", "Status" }
+                        tr {
+                            th { "Tx Hash" }
+                            th { "Time" }
+                            th { "Block" }
+                            th { "Status" }
                         }
                     }
                     tbody {
                         for tx in txs_list_for_desktop {
-                            tr { key: "{tx.transaction_hash}", class: "border-b border-gray-100 hover:bg-gray-50",
-                                td { class: "px-4 py-3",
+                            tr {
+                                td {
                                     transaction_hash { hash: tx.transaction_hash.clone() }
                                 }
-                                td { class: "px-4 py-3 text-gray-500",
+                                td { class: "text-gray-500",
                                     time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                 }
-                                td { class: "px-4 py-3",
+                                td {
                                     block_height { height: tx.tx_block_height }
                                 }
-                                td { class: "px-4 py-3",
+                                td {
                                     if tx.is_success {
-                                        span { class: "text-green-600", "✓ Success" }
+                                        span { class: "status-success", "✓ Success" }
                                     } else {
-                                        span { class: "text-red-600", "✗ Failed" }
+                                        span { class: "status-failed", "✗ Failed" }
                                     }
                                 }
                             }
@@ -209,17 +209,17 @@ pub fn AccountDetail(account_id: String) -> Element {
             }
 
             // Mobile cards
-            div { class: "sm:hidden rounded-lg border border-gray-200 bg-white divide-y divide-gray-100",
+            div { class: "mobile-cards",
                 for tx in txs_list_for_mobile {
-                    div { key: "{tx.transaction_hash}", class: "px-3 py-2.5",
+                    div {
                         div { class: "flex items-center justify-between gap-2 mb-1",
                             span { class: "font-mono text-xs",
                                 transaction_hash { hash: tx.transaction_hash.clone() }
                             }
                             if tx.is_success {
-                                span { class: "text-green-600 text-xs", "✓" }
+                                span { class: "status-success text-xs", "✓" }
                             } else {
-                                span { class: "text-red-600 text-xs", "✗" }
+                                span { class: "status-failed text-xs", "✗" }
                             }
                         }
                         div { class: "text-sm text-gray-500",
@@ -232,16 +232,18 @@ pub fn AccountDetail(account_id: String) -> Element {
             }
 
             if !loading_val && txs_list_empty {
-                p { class: "py-8 text-center text-sm text-gray-500", "No transactions found" }
+                p { class: "empty-state", "No transactions found" }
             }
 
-            // Load more button
+            // Load more button - centered
             if has_more_val {
-                button {
-                    onclick: load_more,
-                    disabled: loading_more_val,
-                    class: "mt-4 w-full py-2 px-4 bg-[#8CA2F5] text-white rounded-lg hover:bg-[#7a91e8] disabled:opacity-50",
-                    if loading_more_val { "Loading..." } else { "Load More" }
+                div { class: "load-more-container",
+                    button {
+                        onclick: load_more,
+                        disabled: loading_more_val,
+                        class: "load-more-button",
+                        if loading_more_val { "Loading..." } else { "Load More" }
+                    }
                 }
             }
         }

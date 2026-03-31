@@ -127,37 +127,37 @@ pub fn BlockDetail(block_id: String) -> Element {
                 }
             }
 
-            div { class: "mb-6 rounded-lg border border-gray-200 bg-white text-sm",
-                dl { class: "grid gap-px sm:grid-cols-2 [&>div]:flex [&>div]:min-w-0 [&>div]:gap-2 [&>div]:border-b [&>div]:border-gray-100 [&>div]:px-4 [&>div]:py-3 [&>div:last-child]:border-b-0",
+            div { class: "detail-card",
+                dl {
                     // Hash
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Hash" }
-                        dd { class: "min-w-0 truncate",
+                        dt { "Hash" }
+                        dd {
                             block_hash { hash: block_hash_val.clone() }
                         }
                     }
                     // Timestamp
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Timestamp" }
+                        dt { "Timestamp" }
                         dd {
                             time_ago { timestamp_ns: block_timestamp_val.clone() }
                         }
                     }
                     // Author
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Author" }
+                        dt { "Author" }
                         dd {
                             account_id { account_id: author_id_val.clone() }
                         }
                     }
                     // Epoch ID
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Epoch ID" }
-                        dd { class: "min-w-0 truncate font-mono text-xs", "{epoch_id_val}" }
+                        dt { "Epoch ID" }
+                        dd { class: "font-mono text-xs truncate", "{epoch_id_val}" }
                     }
                     // Prev Block
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Prev Block" }
+                        dt { "Prev Block" }
                         dd {
                             if let Some(prev_height) = prev_block_height_val {
                                 block_height { height: prev_height }
@@ -168,43 +168,43 @@ pub fn BlockDetail(block_id: String) -> Element {
                     }
                     // Transactions
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Transactions" }
+                        dt { "Transactions" }
                         dd { "{num_transactions_val}" }
                     }
                     // Receipts
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Receipts" }
+                        dt { "Receipts" }
                         dd { "{num_receipts_val}" }
                     }
                     // Gas Used
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Gas Used" }
+                        dt { "Gas Used" }
                         dd {
                             gas_amount { gas: gas_burnt_val }
                         }
                     }
                     // Gas Price
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Gas Price" }
+                        dt { "Gas Price" }
                         dd {
                             near_amount { yocto_near: gas_price_val.clone() }
                         }
                     }
                     // Tokens Burnt
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Tokens Burnt" }
+                        dt { "Tokens Burnt" }
                         dd {
                             near_amount { yocto_near: tokens_burnt_val.clone(), show_price: true }
                         }
                     }
                     // Chunks
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Chunks" }
+                        dt { "Chunks" }
                         dd { "{chunks_included_val}" }
                     }
                     // Protocol Version
                     div {
-                        dt { class: "shrink-0 text-gray-500", "Protocol Version" }
+                        dt { "Protocol Version" }
                         dd { "{protocol_version_val}" }
                     }
                 }
@@ -213,46 +213,46 @@ pub fn BlockDetail(block_id: String) -> Element {
             // Transactions
             if !txs_list.is_empty() {
                 div {
-                    p { class: "mb-3 text-sm text-gray-600",
+                    h2 { class: "section-heading",
                         "Transactions ({num_transactions_val})"
                     }
                     
                     // Desktop table
-                    div { class: "hidden sm:block overflow-x-auto rounded-lg border border-gray-200 bg-white",
-                        table { class: "w-full text-sm",
+                    div { class: "table-container",
+                        table {
                             thead {
-                                tr { class: "border-b border-gray-200 bg-gray-50 text-left text-xs font-medium uppercase text-gray-500",
-                                    th { class: "px-4 py-3", "Tx Hash" }
-                                    th { class: "px-4 py-3", "Time" }
-                                    th { class: "px-4 py-3", "Signer" }
-                                    th { class: "px-4 py-3", "Receiver" }
-                                    th { class: "px-4 py-3 text-right", "Gas" }
-                                    th { class: "px-4 py-3", "Status" }
+                                tr {
+                                    th { "Tx Hash" }
+                                    th { "Time" }
+                                    th { "Signer" }
+                                    th { "Receiver" }
+                                    th { class: "text-right", "Gas" }
+                                    th { "Status" }
                                 }
                             }
                             tbody {
                                 for tx in txs_list_for_desktop {
-                                    tr { key: "{tx.transaction_hash}", class: "border-b border-gray-100 hover:bg-gray-50",
-                                        td { class: "px-4 py-3",
+                                    tr {
+                                        td {
                                             transaction_hash { hash: tx.transaction_hash.clone() }
                                         }
-                                        td { class: "px-4 py-3 text-gray-500",
+                                        td { class: "text-gray-500",
                                             time_ago { timestamp_ns: tx.tx_block_timestamp.clone() }
                                         }
-                                        td { class: "px-4 py-3",
+                                        td {
                                             account_id { account_id: tx.signer_id.clone() }
                                         }
-                                        td { class: "px-4 py-3",
+                                        td {
                                             account_id { account_id: tx.receiver_id.clone() }
                                         }
-                                        td { class: "px-4 py-3 text-right",
+                                        td { class: "text-right",
                                             gas_amount { gas: tx.gas_burnt }
                                         }
-                                        td { class: "px-4 py-3",
+                                        td {
                                             if tx.is_success {
-                                                span { class: "text-green-600", "✓" }
+                                                span { class: "status-success", "✓" }
                                             } else {
-                                                span { class: "text-red-600", "✗" }
+                                                span { class: "status-failed", "✗" }
                                             }
                                         }
                                     }
@@ -262,17 +262,17 @@ pub fn BlockDetail(block_id: String) -> Element {
                     }
 
                     // Mobile cards
-                    div { class: "sm:hidden rounded-lg border border-gray-200 bg-white divide-y divide-gray-100",
+                    div { class: "mobile-cards",
                         for tx in txs_list_for_mobile {
-                            div { key: "{tx.transaction_hash}", class: "px-3 py-2.5",
+                            div {
                                 div { class: "flex items-center justify-between gap-2 mb-1",
-                                    span { class: "font-mono text-xs",
+                                    span { class: "font-mono text-xs truncate",
                                         transaction_hash { hash: tx.transaction_hash.clone() }
                                     }
                                     if tx.is_success {
-                                        span { class: "text-green-600 text-xs", "✓" }
+                                        span { class: "status-success text-xs", "✓" }
                                     } else {
-                                        span { class: "text-red-600 text-xs", "✗" }
+                                        span { class: "status-failed text-xs", "✗" }
                                     }
                                 }
                                 div { class: "text-sm text-gray-500",
@@ -289,10 +289,12 @@ pub fn BlockDetail(block_id: String) -> Element {
 
                     // Load more button
                     if has_more_val {
-                        button {
-                            onclick: load_more,
-                            class: "mt-4 w-full py-2 px-4 bg-[#8CA2F5] text-white rounded-lg hover:bg-[#7a91e8]",
-                            "Show More"
+                        div { class: "load-more-container",
+                            button {
+                                onclick: load_more,
+                                class: "load-more-button",
+                                "Show More"
+                            }
                         }
                     }
                 }

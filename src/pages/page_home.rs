@@ -198,7 +198,7 @@ pub fn Home() -> Element {
             }
 
             if !loading() && blocks().is_empty() {
-                p { class: "py-8 text-center text-sm text-gray-500", "No blocks available" }
+                p { class: "empty-state", "No blocks available" }
             }
 
             // Load more button - centered
