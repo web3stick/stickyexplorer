@@ -1,9 +1,14 @@
+// components/button_network.rs
+// =========================================
+// Network toggle button component
+// =========================================
 use crate::logic::network::{
-    get_stored_network_id, save_network_id, toggle_network,
+    get_stored_network_id, save_network_id, toggle_network, NetworkId,
 };
 use dioxus::prelude::*;
 use web_sys::console;
-// ===========================================
+// =========================================
+
 #[component]
 pub fn button_network() -> Element {
     let mut network_id = use_signal(|| get_stored_network_id());
@@ -23,11 +28,18 @@ pub fn button_network() -> Element {
         console::log_1(&format!("{}", new_network.as_str()).into());
     };
 
+    let button_class = match network_id() {
+        NetworkId::Mainnet => "bg-[#8CA2F5] hover:bg-[#7a91e8]",
+        NetworkId::Testnet => "bg-[#C9A8F4] hover:bg-[#b895e3]",
+    };
+
     rsx! {
         button {
             onclick: toggle_network_handler,
+            class: "px-3 py-1.5 rounded-lg text-white font-medium text-sm transition-colors {button_class}",
             "{network_id().as_str().to_uppercase()}"
         }
     }
 }
-// ===========================================
+// =========================================
+// copyright 2026 by sleet.near

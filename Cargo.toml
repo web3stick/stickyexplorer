@@ -7,13 +7,19 @@ edition = "2021"
 # ===========================================
 [dependencies]
 dioxus = { version = "0.7.1", features = ["router"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.12", default-features = false, features = ["json"] }
 wasm-bindgen = "0.2.115"
 wasm-bindgen-futures = "0.4.65"
 web-sys = { version = "0.3.90", features = ["Crypto", "SubtleCrypto", "Window", "HtmlDocument", "Location", "Request", "RequestInit", "Response", "console", "Headers", "Storage", "StorageManager"] }
+chrono = { version = "0.4", default-features = false, features = ["std", "now", "wasmbind"] }
+gloo-timers = { version = "0.3", features = ["futures"] }
+base64 = "0.22"
 # ===========================================
 [features]
 default = ["web"]
-web = ["dioxus/web"]
-desktop = ["dioxus/desktop"]
-mobile = ["dioxus/mobile"]
+web = ["dioxus/web", "reqwest/default-tls"]
+desktop = ["dioxus/desktop", "reqwest/default-tls"]
+mobile = ["dioxus/mobile", "reqwest/default-tls"]
 # ===========================================

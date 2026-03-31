@@ -1,11 +1,52 @@
-/* App-wide styling */
+/* App-wide styling - Light mode */
+/* Color palette:
+   #8CA2F5 - Primary purple
+   #C9A8F4 - Light purple
+   #95D58D - Green
+   #FF8A8A - Red
+   #FFFFFF - White
+   #000000 - Black
+   #FFF8A3 - Yellow
+   #FFC58A - Orange
+*/
+
 body {
-    background-color: #0f1116;
-    color: #ffffff;
+    background-color: #f5f5f5;
+    color: #000000;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 20px;
 }
 
+/* Surface/background for cards and tables */
+.bg-white, .bg-surface {
+    background-color: #ffffff;
+}
+
+/* Header */
+#header {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Navbar */
+#navbar {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+#navbar a {
+    color: #000000;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+#navbar a:hover {
+    color: #8CA2F5;
+}
+
+/* Hero section */
 #hero {
     margin: 0;
     display: flex;
@@ -14,59 +55,129 @@ body {
     align-items: center;
 }
 
+/* Links section */
 #links {
     width: 400px;
     text-align: left;
     font-size: x-large;
-    color: white;
+    color: #000000;
     display: flex;
     flex-direction: column;
 }
 
 #links a {
-    color: white;
+    color: #000000;
     text-decoration: none;
     margin-top: 20px;
     margin: 10px 0px;
-    border: white 1px solid;
+    border: #000000 1px solid;
     border-radius: 5px;
     padding: 10px;
 }
 
 #links a:hover {
-    background-color: #1f1f1f;
+    background-color: #f0f0f0;
     cursor: pointer;
-}
-
-#header {
-    max-width: 1200px;
-}
-
-/* Navbar */
-#navbar {
-    display: flex;
-    flex-direction: row;
-  }
-  
-#navbar a {
-    color: #ffffff;
-    margin-right: 20px;
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-#navbar a:hover {
-    cursor: pointer;
-    color: #91a4d2;
 }
 
 /* Blog page */
 #blog {
     margin-top: 50px;
-  }
-  
+}
+
 #blog a {
-    color: #ffffff;
+    color: #000000;
     margin-top: 50px;
+}
+
+/* Utility classes */
+.text-gray-500 {
+    color: #6b7280;
+}
+
+.text-gray-600 {
+    color: #4b5563;
+}
+
+.text-red-600 {
+    color: #FF8A8A;
+}
+
+.text-green-600 {
+    color: #95D58D;
+}
+
+.text-yellow-500 {
+    color: #FFF8A3;
+}
+
+.text-blue-600 {
+    color: #8CA2F5;
+}
+
+.bg-gray-50 {
+    background-color: #f9fafb;
+}
+
+.bg-gray-100 {
+    background-color: #f3f4f6;
+}
+
+.border-gray-100 {
+    border-color: #f3f4f6;
+}
+
+.border-gray-200 {
+    border-color: #e5e7eb;
+}
+
+.hover\:bg-gray-50:hover {
+    background-color: #f9fafb;
+}
+
+/* Font mono */
+.font-mono {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Links */
+a {
+    color: #8CA2F5;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .hidden.sm\:block {
+        display: none;
+    }
+    .sm\:hidden {
+        display: block;
+    }
 }
 
