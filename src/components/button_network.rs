@@ -3,7 +3,7 @@ use crate::logic::network::{
 };
 use dioxus::prelude::*;
 use web_sys::console;
-
+// ===========================================
 #[component]
 pub fn button_network() -> Element {
     let mut network_id = use_signal(|| get_stored_network_id());
@@ -30,3 +30,4 @@ pub fn button_network() -> Element {
         }
     }
 }
+// ===========================================
