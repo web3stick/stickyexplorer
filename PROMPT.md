@@ -19,7 +19,7 @@ we will just have light mode cause i don't have a color palette for dark mode un
 
 i want you to keep the explorer api client and other logic separte from ui components, and i want you to keep everything clean and organized. so that i can publish this crate and ruse
 
-i have restructured this dioxus project a little i want you to see how i have files and 
+i have restructured this dioxus project a little i want you to see how i have files and keep the fromate the same way with the // ======== comments that i have near top and bottom of file.
 
 ---
 
