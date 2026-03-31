@@ -8,5 +8,9 @@ pub mod pages {
 }
 pub mod components {
     pub mod hero;
+    pub mod button_network;
+}
+pub mod logic {
+    pub mod network;
 }
 // =========================================
