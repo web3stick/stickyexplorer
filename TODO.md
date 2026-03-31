@@ -5,7 +5,10 @@
 - [ ] better json display
 - [ ] more details like near social data
 - [ ] cleaner code
-- [ ] inifinit scroll
+- [ ] inifinit scroll?? not really needed
+- [ ] more links "Signer	Receiver" should be links on the account page
+- [ ] 
+
 
 ---
 
