@@ -5,7 +5,7 @@
 - [ ] better json display
 - [ ] more details like near social data
 - [ ] cleaner code
-- [ ] 
+- [ ] inifinit scroll
 
 ---
 
