@@ -3,7 +3,6 @@
 // Search bar component with network auto-switching
 // =========================================
 use dioxus::prelude::*;
-use crate::logic::network::{NetworkId, save_network_id, get_stored_network_id};
 use crate::utils::format::decode_base58;
 // =========================================
 
@@ -29,7 +28,6 @@ fn detect_type(q: &str) -> Option<&'static str> {
 #[component]
 pub fn search_bar() -> Element {
     let mut query = use_signal(|| String::new());
-    let network_id = use_signal(|| get_stored_network_id());
     let navigator = use_navigator();
 
     let search_type = use_memo(move || detect_type(&query()));
@@ -52,23 +50,12 @@ pub fn search_bar() -> Element {
                 navigator.push(format!("/tx/{}", q));
             }
             "account" => {
-                // Check for network auto-switching
-                let detected_network = NetworkId::from_account_id(&q);
-                let current_network = network_id();
-                
-                if detected_network != current_network {
-                    // Save the new network and redirect to the other network
-                    let _ = save_network_id(detected_network);
-                    // For cross-network redirects, we need to change the domain
-                    // This is a simplified version - in production you'd use actual domains
-                    let other_network_url = current_network.other_network_url();
-                    let redirect_url = format!("{}/account/{}", other_network_url, q);
-                    // Use window.location for cross-domain redirect
-                    if let Some(window) = web_sys::window() {
-                        let _ = window.location().set_href(&redirect_url);
-                    }
+                // Auto-switch network based on account suffix
+                // .testnet → testnet, everything else (.near, .tg, etc.) → mainnet
+                if q.ends_with(".testnet") {
+                    navigator.push(format!("/testnet/account/{}", q));
                 } else {
-                    navigator.push(format!("/account/{}", q));
+                    navigator.push(format!("/mainnet/account/{}", q));
                 }
             }
             _ => {}
