@@ -6,7 +6,8 @@ use crate::api::types::{AccountFilters, AccountTx};
 use crate::components::ui::{time_ago, transaction_hash};
 use crate::logic::network::NetworkId;
 use crate::logic::tx_cache::TxCache;
-use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
+use crate::pages::fetch_transactions::fetch_and_parse_transactions;
+use crate::utils::parse_transaction::ParsedTx;
 use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
@@ -23,11 +24,6 @@ struct AccountParams<'a> {
     resume_token: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     limit: Option<u32>,
-}
-
-#[derive(Clone, Serialize)]
-struct TxParams {
-    tx_hashes: Vec<String>,
 }
 
 #[component]
@@ -99,7 +95,6 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                             let has_more_txs =
                                 token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
 
-                            // Fetch full transaction details (with caching)
                             let hashes: Vec<String> =
                                 new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
                             let parsed =
@@ -172,7 +167,6 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                             let has_more_txs =
                                 token.is_some() && new_txs.len() >= BATCH_SIZE as usize;
 
-                            // Fetch full transaction details (with caching)
                             let hashes: Vec<String> =
                                 new_txs.iter().map(|t| t.transaction_hash.clone()).collect();
                             let parsed =
@@ -259,8 +253,7 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                                             span { class: "text-xs",
                                                 "{first_action.action_type}"
                                                 if let Some(ref method) = first_action.method_name {
-                                                    "::"
-                                                    "{method}"
+                                                    "::{method}"
                                                 }
                                             }
                                         } else {
@@ -325,8 +318,7 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                                         span { class: "text-xs",
                                             "{first_action.action_type}"
                                             if let Some(ref method) = first_action.method_name {
-                                                "::"
-                                                "{method}"
+                                                "::{method}"
                                             }
                                         }
                                     } else {
@@ -360,80 +352,6 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
             }
         }
     }
-}
-
-async fn fetch_and_parse_transactions(
-    api_base: &str,
-    hashes: &[String],
-    tx_cache: &mut Signal<TxCache>,
-) -> Vec<(String, ParsedTx)> {
-    if hashes.is_empty() {
-        return Vec::new();
-    }
-
-    // First check cache for existing transactions
-    let mut all_parsed = Vec::new();
-    let mut missing_hashes = Vec::new();
-
-    for hash in hashes {
-        if let Some(parsed) = tx_cache.read().get(hash) {
-            all_parsed.push((hash.clone(), parsed.clone()));
-        } else {
-            missing_hashes.push(hash.clone());
-        }
-    }
-
-    // If we have all in cache, return early
-    if missing_hashes.is_empty() {
-        return all_parsed;
-    }
-
-    const BATCH_SIZE: usize = 20;
-
-    // Process missing in batches to avoid API limits
-    for chunk in missing_hashes.chunks(BATCH_SIZE) {
-        let client = Client::new();
-        let params = TxParams {
-            tx_hashes: chunk.to_vec(),
-        };
-
-        match client
-            .post(format!("{}/v0/transactions", api_base))
-            .json(&params)
-            .send()
-            .await
-        {
-            Ok(resp) => {
-                if let Ok(data) = resp.json::<serde_json::Value>().await {
-                    if let Some(tx_array) = data.get("transactions").and_then(|v| v.as_array()) {
-                        let parsed: Vec<(String, ParsedTx)> = tx_array
-                            .iter()
-                            .filter_map(|v| {
-                                serde_json::from_value::<crate::api::types::TransactionDetail>(
-                                    v.clone(),
-                                )
-                                .ok()
-                            })
-                            .map(|tx| {
-                                let parsed = parse_transaction(&tx);
-                                (parsed.hash.clone(), parsed.clone())
-                            })
-                            .collect();
-
-                        // Add to cache
-                        tx_cache.write().insert_batch(parsed.clone());
-                        all_parsed.extend(parsed);
-                    }
-                }
-            }
-            Err(_) => {}
-        }
-
-        // Small delay between batches to avoid rate limiting
-        gloo_timers::future::TimeoutFuture::new(50).await;
-    }
-
-    all_parsed
 }
 // =========================================
 // copyright 2026 by sleet.near

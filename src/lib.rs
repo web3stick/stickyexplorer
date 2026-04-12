@@ -2,6 +2,7 @@
 // =========================================
 pub mod api;
 pub mod pages {
+    pub mod fetch_transactions;
     pub mod page_account_detail;
     pub mod page_block_detail;
     pub mod page_home;
