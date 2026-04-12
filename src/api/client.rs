@@ -1,6 +1,6 @@
 // api/client.rs
 // =========================================
-// API client for NEAR Explorer
+// API client for NEAR Explorer with logging
 // =========================================
 use crate::api::types::*;
 use reqwest::Client;
@@ -8,18 +8,52 @@ use serde::Serialize;
 // =========================================
 
 /// API client for FastNear
+#[derive(Clone)]
 pub struct ApiClient {
     client: Client,
     base_url: String,
+    network: String,
 }
 
 impl ApiClient {
-    /// Create a new API client
-    pub fn new(base_url: impl Into<String>) -> Self {
+    /// Create a new API client for a given network
+    pub fn new(base_url: impl Into<String>, network: impl Into<String>) -> Self {
         Self {
             client: Client::new(),
             base_url: base_url.into(),
+            network: network.into(),
         }
+    }
+
+    /// Create client for mainnet
+    pub fn mainnet() -> Self {
+        Self::new("https://api.fastnear.com", "mainnet")
+    }
+
+    /// Create client for testnet
+    pub fn testnet() -> Self {
+        Self::new("https://api-testnet.fastnear.com", "testnet")
+    }
+
+    /// Log request to console
+    fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
+        let url = format!("{}/v0/{}", self.base_url, endpoint);
+        let params_json = serde_json::to_string(params).unwrap_or_default();
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
+        web_sys::console::log_1(&format!("params: {}", params_json).into());
+        web_sys::console::log_1(&"============".into());
+    }
+
+    /// Log response to console
+    fn log_response(&self, endpoint: &str, status: u16, body: &str) {
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
+        web_sys::console::log_1(&format!("status: {}", status).into());
+        // Log first 500 chars of body
+        let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
+        web_sys::console::log_1(&format!("body: {}", preview).into());
+        web_sys::console::log_1(&"============".into());
     }
 
     /// Fetch from API endpoint
@@ -27,16 +61,27 @@ impl ApiClient {
         &self,
         endpoint: &str,
         body: impl Serialize,
-    ) -> Result<T, reqwest::Error> {
+    ) -> Result<T, String> {
         let url = format!("{}/v0/{}", self.base_url, endpoint);
+        self.log_request(endpoint, &body);
         let response = self
             .client
             .post(&url)
             .json(&body)
             .send()
-            .await?
-            .error_for_status()?;
-        response.json().await
+            .await
+            .map_err(|e| e.to_string())?;
+        let status = response.status().as_u16();
+        let body_text = response.text().await.unwrap_or_default();
+        self.log_response(endpoint, status, &body_text);
+        let parsed: T = match serde_json::from_str(&body_text) {
+            Ok(v) => v,
+            Err(e) => {
+                web_sys::console::log_1(&format!("JSON parse error: {}", e).into());
+                return Err(e.to_string());
+            }
+        };
+        Ok(parsed)
     }
 
     /// Get blocks
@@ -46,7 +91,7 @@ impl ApiClient {
         desc: Option<bool>,
         to_block_height: Option<u64>,
         from_block_height: Option<u64>,
-    ) -> Result<BlocksResponse, reqwest::Error> {
+    ) -> Result<BlocksResponse, String> {
         #[derive(Serialize)]
         struct Params {
             #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,7 +103,6 @@ impl ApiClient {
             #[serde(skip_serializing_if = "Option::is_none")]
             from_block_height: Option<u64>,
         }
-
         self.fetch_api(
             "blocks",
             Params {
@@ -76,19 +120,17 @@ impl ApiClient {
         &self,
         block_id: BlockId,
         with_transactions: bool,
-    ) -> Result<BlockDetailResponse, reqwest::Error> {
+    ) -> Result<BlockDetailResponse, String> {
         #[derive(Serialize)]
         struct Params {
             block_id: String,
             #[serde(skip_serializing_if = "Option::is_none")]
             with_transactions: Option<bool>,
         }
-
         let block_id_str = match block_id {
             BlockId::Height(h) => h.to_string(),
             BlockId::Hash(h) => h,
         };
-
         self.fetch_api(
             "block",
             Params {
@@ -103,12 +145,11 @@ impl ApiClient {
     pub async fn get_transactions(
         &self,
         tx_hashes: Vec<String>,
-    ) -> Result<TransactionsResponse, reqwest::Error> {
+    ) -> Result<TransactionsResponse, String> {
         #[derive(Serialize)]
         struct Params {
             tx_hashes: Vec<String>,
         }
-
         self.fetch_api("transactions", Params { tx_hashes }).await
     }
 
@@ -119,7 +160,7 @@ impl ApiClient {
         filters: &AccountFilters,
         resume_token: Option<&str>,
         limit: Option<u32>,
-    ) -> Result<AccountResponse, reqwest::Error> {
+    ) -> Result<AccountResponse, String> {
         #[derive(Serialize)]
         struct Params<'a> {
             account_id: &'a str,
@@ -130,7 +171,6 @@ impl ApiClient {
             #[serde(skip_serializing_if = "Option::is_none")]
             limit: Option<u32>,
         }
-
         self.fetch_api(
             "account",
             Params {

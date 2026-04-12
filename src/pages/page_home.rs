@@ -2,25 +2,14 @@
 // =========================================
 // Home page - Latest blocks list with infinite scroll
 // =========================================
+use crate::api::client::ApiClient;
 use crate::api::types::BlockHeader;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago};
 use crate::logic::network::get_stored_network_id;
 use dioxus::prelude::*;
-use reqwest::Client;
-use serde::Serialize;
 // =========================================
 
 const BATCH_SIZE: u32 = 80;
-
-#[derive(Clone, Serialize)]
-struct BlocksParams {
-    limit: u32,
-    desc: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    to_block_height: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    from_block_height: Option<u64>,
-}
 
 #[component]
 pub fn Home() -> Element {
@@ -31,48 +20,29 @@ pub fn Home() -> Element {
     let mut has_more = use_signal(|| true);
     let mut loading_more = use_signal(|| false);
 
-    let network_id = get_stored_network_id();
-    let api_base = network_id.api_base_url();
-
     // Initial load
     use_effect(move || {
-        let api_base = api_base.to_string();
         spawn(async move {
             loading.set(true);
             error.set(None);
 
-            let client = Client::new();
-            let params = BlocksParams {
-                limit: BATCH_SIZE,
-                desc: true,
-                to_block_height: None,
-                from_block_height: None,
-            };
+            let network_id = get_stored_network_id();
+            let api_client = ApiClient::new(network_id.api_base_url(), network_id.as_str());
 
-            match client
-                .post(format!("{}/v0/blocks", api_base))
-                .json(&params)
-                .send()
+            match api_client
+                .get_blocks(Some(BATCH_SIZE), Some(true), None, None)
                 .await
             {
-                Ok(resp) => {
-                    if let Ok(data) = resp.json::<serde_json::Value>().await {
-                        if let Some(block_array) = data.get("blocks").and_then(|v| v.as_array()) {
-                            let new_blocks: Vec<BlockHeader> = block_array
-                                .iter()
-                                .filter_map(|v| serde_json::from_value(v.clone()).ok())
-                                .collect();
-
-                            if !new_blocks.is_empty() {
-                                if let Some(last) = new_blocks.last() {
-                                    resume_token.set(Some(last.block_height.saturating_sub(1)));
-                                }
-                            } else {
-                                has_more.set(false);
-                            }
-                            blocks.set(new_blocks);
+                Ok(data) => {
+                    let block_array = data.blocks;
+                    if !block_array.is_empty() {
+                        if let Some(last) = block_array.last() {
+                            resume_token.set(Some(last.block_height.saturating_sub(1)));
                         }
+                    } else {
+                        has_more.set(false);
                     }
+                    blocks.set(block_array);
                 }
                 Err(e) => {
                     error.set(Some(e.to_string()));
@@ -87,42 +57,29 @@ pub fn Home() -> Element {
             return;
         }
 
-        let api_base = api_base.to_string();
         let token = resume_token();
         loading_more.set(true);
 
         spawn(async move {
-            let client = Client::new();
-            let params = BlocksParams {
-                limit: BATCH_SIZE,
-                desc: true,
-                to_block_height: token,
-                from_block_height: None,
-            };
+            let network_id = get_stored_network_id();
+            let api_client = ApiClient::new(network_id.api_base_url(), network_id.as_str());
 
-            if let Ok(resp) = client
-                .post(format!("{}/v0/blocks", api_base))
-                .json(&params)
-                .send()
+            match api_client
+                .get_blocks(Some(BATCH_SIZE), Some(true), token, None)
                 .await
             {
-                if let Ok(data) = resp.json::<serde_json::Value>().await {
-                    if let Some(block_array) = data.get("blocks").and_then(|v| v.as_array()) {
-                        let new_blocks: Vec<BlockHeader> = block_array
-                            .iter()
-                            .filter_map(|v| serde_json::from_value(v.clone()).ok())
-                            .collect();
-
-                        if new_blocks.is_empty() || new_blocks.len() < BATCH_SIZE as usize {
-                            has_more.set(false);
-                        }
-
-                        if let Some(last) = new_blocks.last() {
-                            resume_token.set(Some(last.block_height.saturating_sub(1)));
-                        }
-
-                        blocks.write().extend(new_blocks);
+                Ok(data) => {
+                    let new_blocks = data.blocks;
+                    if new_blocks.is_empty() || new_blocks.len() < BATCH_SIZE as usize {
+                        has_more.set(false);
                     }
+                    if let Some(last) = new_blocks.last() {
+                        resume_token.set(Some(last.block_height.saturating_sub(1)));
+                    }
+                    blocks.write().extend(new_blocks);
+                }
+                Err(_) => {
+                    has_more.set(false);
                 }
             }
             loading_more.set(false);
@@ -137,12 +94,6 @@ pub fn Home() -> Element {
 
     rsx! {
         div {
-            // Greeting banner
-            div { class: "greeting-banner",
-                "Made with love by "
-                a { href: "https://sleet.near", target: "_blank", "sleet.near" }
-            }
-
             h1 { class: "mb-4 text-xl font-bold", "Latest Blocks" }
 
             // Desktop table
