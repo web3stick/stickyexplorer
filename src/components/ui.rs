@@ -28,6 +28,7 @@ pub fn account_id(
         Link {
             to: format!("/{network_prefix}account/{}", account_id),
             class: "font-mono text-sm hover:underline",
+            style: "overflow-wrap: break-word; word-break: break-all;",
             "{display}"
         }
     }

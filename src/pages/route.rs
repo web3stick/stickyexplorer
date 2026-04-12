@@ -133,6 +133,9 @@ pub enum Route {
     TestnetTx { tx_hash: String },
     #[route("/testnet/block/:block_id")]
     TestnetBlock { block_id: String },
+    // Catch-all for unknown routes
+    #[route("/:catchall")]
+    CatchAll { catchall: String },
 }
 
 #[component]
@@ -148,6 +151,16 @@ pub fn Navbar() -> Element {
             }
         }
         main { class: "max-w-7xl mx-auto py-6", Outlet::<Route> {} }
+    }
+}
+#[component]
+fn CatchAll(catchall: String) -> Element {
+    let navigator = use_navigator();
+    use_effect(move || {
+        navigator.push("/");
+    });
+    rsx! {
+        div { class: "text-gray-500 text-center py-8", "Page not found — redirecting..." }
     }
 }
 // =========================================
