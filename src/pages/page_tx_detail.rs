@@ -5,7 +5,7 @@
 use crate::api::client::ApiClient;
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago, transaction_hash};
-use crate::components::widgets::{get_matching_widgets, WidgetType};
+use crate::components::widgets::{get_matching_widgets, DefaultWidget, WidgetType};
 use crate::logic::network::NetworkId;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
@@ -70,14 +70,10 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
     let tx_detail = tx().unwrap();
     let widgets = get_matching_widgets(&tx_detail);
 
-    // Separate explanation and utility widgets
+    // Explanation widgets only (utility widgets like raw JSON are rendered separately)
     let explanation_widgets: Vec<_> = widgets
         .iter()
         .filter(|w| w.widget_type == WidgetType::Explanation)
-        .collect();
-    let utility_widgets: Vec<_> = widgets
-        .iter()
-        .filter(|w| w.widget_type == WidgetType::Utility)
         .collect();
 
     rsx! {
@@ -252,10 +248,8 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                 }
             }
 
-            // Utility widgets (e.g., raw JSON)
-            for widget in utility_widgets {
-                {(widget.render)(&tx_detail)}
-            }
+            // Raw JSON widget (uses hook, must be component)
+            DefaultWidget { tx_json: serde_json::to_string_pretty(&tx_detail).unwrap_or_default() }
         }
     }
 }
