@@ -122,18 +122,24 @@ impl ApiClient {
         with_transactions: bool,
     ) -> Result<BlockDetailResponse, String> {
         #[derive(Serialize)]
+        #[serde(untagged)]
+        enum BlockIdParam {
+            Height(u64),
+            Hash(String),
+        }
+        #[derive(Serialize)]
         struct Params {
-            block_id: String,
+            block_id: BlockIdParam,
             with_transactions: bool,
         }
-        let block_id_str = match block_id {
-            BlockId::Height(h) => h.to_string(),
-            BlockId::Hash(h) => h,
+        let block_id_param = match block_id {
+            BlockId::Height(h) => BlockIdParam::Height(h),
+            BlockId::Hash(h) => BlockIdParam::Hash(h),
         };
         self.fetch_api(
             "block",
             Params {
-                block_id: block_id_str,
+                block_id: block_id_param,
                 with_transactions,
             },
         )
