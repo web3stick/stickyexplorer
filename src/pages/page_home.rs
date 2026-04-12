@@ -137,6 +137,12 @@ pub fn Home() -> Element {
 
     rsx! {
         div {
+            // Greeting banner
+            div { class: "greeting-banner",
+                "Made with love by "
+                a { href: "https://sleet.near", target: "_blank", "sleet.near" }
+            }
+
             h1 { class: "mb-4 text-xl font-bold", "Latest Blocks" }
 
             // Desktop table

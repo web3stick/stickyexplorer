@@ -126,3 +126,21 @@ h1 {
     font-size: 0.875rem;
     color: #6b7280;
 }
+
+/* =========================================
+   Greeting Banner
+   ========================================= */
+.greeting-banner {
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    background-color: #FFF8A3;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+.greeting-banner a {
+    color: #8CA2F5;
+    font-weight: 500;
+}
