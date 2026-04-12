@@ -4,7 +4,7 @@
 // =========================================
 use crate::components::button_network::button_network;
 use crate::components::search_bar::search_bar;
-use crate::logic::network::{save_network_id, NetworkId};
+use crate::logic::network::NetworkId;
 use crate::pages::page_account_detail::AccountDetail;
 use crate::pages::page_block_detail::BlockDetail;
 use crate::pages::page_home::Home as HomePage;
@@ -14,9 +14,6 @@ use dioxus::prelude::*;
 
 #[component]
 fn MainnetHome() -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Mainnet);
-    });
     rsx! {
         HomePage {}
     }
@@ -24,9 +21,6 @@ fn MainnetHome() -> Element {
 
 #[component]
 fn MainnetHomeRedirect() -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Mainnet);
-    });
     let navigator = use_navigator();
     use_effect(move || {
         navigator.push("/mainnet");
@@ -38,9 +32,6 @@ fn MainnetHomeRedirect() -> Element {
 
 #[component]
 fn MainnetAccount(account_id: String) -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Mainnet);
-    });
     rsx! {
         AccountDetail { account_id, network: NetworkId::Mainnet }
     }
@@ -48,9 +39,6 @@ fn MainnetAccount(account_id: String) -> Element {
 
 #[component]
 fn MainnetTx(tx_hash: String) -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Mainnet);
-    });
     rsx! {
         TxDetail { tx_hash, network: NetworkId::Mainnet }
     }
@@ -58,9 +46,6 @@ fn MainnetTx(tx_hash: String) -> Element {
 
 #[component]
 fn MainnetBlock(block_id: String) -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Mainnet);
-    });
     rsx! {
         BlockDetail { block_id, network: NetworkId::Mainnet }
     }
@@ -68,9 +53,6 @@ fn MainnetBlock(block_id: String) -> Element {
 
 #[component]
 fn TestnetHomeRedirect() -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Testnet);
-    });
     let navigator = use_navigator();
     use_effect(move || {
         navigator.push("/testnet");
@@ -82,9 +64,6 @@ fn TestnetHomeRedirect() -> Element {
 
 #[component]
 fn TestnetAccount(account_id: String) -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Testnet);
-    });
     rsx! {
         AccountDetail { account_id, network: NetworkId::Testnet }
     }
@@ -92,9 +71,6 @@ fn TestnetAccount(account_id: String) -> Element {
 
 #[component]
 fn TestnetTx(tx_hash: String) -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Testnet);
-    });
     rsx! {
         TxDetail { tx_hash, network: NetworkId::Testnet }
     }
@@ -102,9 +78,6 @@ fn TestnetTx(tx_hash: String) -> Element {
 
 #[component]
 fn TestnetBlock(block_id: String) -> Element {
-    use_effect(move || {
-        let _ = save_network_id(NetworkId::Testnet);
-    });
     rsx! {
         BlockDetail { block_id, network: NetworkId::Testnet }
     }

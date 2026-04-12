@@ -98,7 +98,7 @@ fn get_web_storage() -> Option<web_sys::Storage> {
         .flatten()
 }
 
-/// Initialize network state from localStorage
+/// Save the network ID to localStorage
 ///
 /// This should be used in a `use_effect` hook to load the stored network ID
 pub fn use_network_state() -> Signal<NetworkId> {
