@@ -5,7 +5,20 @@
 use crate::api::types::*;
 use reqwest::Client;
 use serde::Serialize;
+use web_sys::console;
 // =========================================
+
+fn log_to_console(msg: &str) {
+    console::log_1(&msg.into());
+}
+
+fn get_network(base_url: &str) -> &str {
+    if base_url.contains("testnet") {
+        "testnet"
+    } else {
+        "mainnet"
+    }
+}
 
 /// API client for FastNear
 pub struct ApiClient {
@@ -22,13 +35,29 @@ impl ApiClient {
         }
     }
 
-    /// Fetch from API endpoint
-    async fn fetch_api<T: serde::de::DeserializeOwned>(
+    /// Fetch raw text from API endpoint
+    async fn fetch_api_raw(
         &self,
         endpoint: &str,
         body: impl Serialize,
-    ) -> Result<T, reqwest::Error> {
+    ) -> Result<String, reqwest::Error> {
+        let network = get_network(&self.base_url);
         let url = format!("{}/v0/{}", self.base_url, endpoint);
+        let body_json = serde_json::to_string(&body).unwrap_or_default();
+
+        // =========================================
+        // LOG: API request with full URL and params
+        // =========================================
+        let request_log = format!(
+            "============ API REQUEST ============\n\
+            endpoint: {}\n\
+            network: {}\n\
+            url: {}\n\
+            params: {}",
+            endpoint, network, url, body_json
+        );
+        log_to_console(&request_log);
+
         let response = self
             .client
             .post(&url)
@@ -36,7 +65,27 @@ impl ApiClient {
             .send()
             .await?
             .error_for_status()?;
-        response.json().await
+
+        let response_text = response.text().await?;
+
+        // =========================================
+        // LOG: API response with full data
+        // =========================================
+        let response_log = format!(
+            "============ API RESPONSE ============\n\
+            endpoint: {}\n\
+            network: {}\n\
+            response: {}",
+            endpoint, network, response_text
+        );
+        log_to_console(&response_log);
+
+        Ok(response_text)
+    }
+
+    /// Parse raw JSON response (panics on failure — raw response logged above)
+    fn parse_response<T: serde::de::DeserializeOwned>(text: &str) -> T {
+        serde_json::from_str(text).expect("failed to parse API response (logged above)")
     }
 
     /// Get blocks
@@ -59,16 +108,18 @@ impl ApiClient {
             from_block_height: Option<u64>,
         }
 
-        self.fetch_api(
-            "blocks",
-            Params {
-                limit,
-                desc,
-                to_block_height,
-                from_block_height,
-            },
-        )
-        .await
+        let raw = self
+            .fetch_api_raw(
+                "blocks",
+                Params {
+                    limit,
+                    desc,
+                    to_block_height,
+                    from_block_height,
+                },
+            )
+            .await?;
+        Ok(Self::parse_response(&raw))
     }
 
     /// Get block by ID (height or hash)
@@ -89,14 +140,16 @@ impl ApiClient {
             BlockId::Hash(h) => h,
         };
 
-        self.fetch_api(
-            "block",
-            Params {
-                block_id: block_id_str,
-                with_transactions: Some(with_transactions).filter(|v| *v),
-            },
-        )
-        .await
+        let raw = self
+            .fetch_api_raw(
+                "block",
+                Params {
+                    block_id: block_id_str,
+                    with_transactions: Some(with_transactions).filter(|v| *v),
+                },
+            )
+            .await?;
+        Ok(Self::parse_response(&raw))
     }
 
     /// Get transactions by hashes
@@ -109,7 +162,8 @@ impl ApiClient {
             tx_hashes: Vec<String>,
         }
 
-        self.fetch_api("transactions", Params { tx_hashes }).await
+        let raw = self.fetch_api_raw("transactions", Params { tx_hashes }).await?;
+        Ok(Self::parse_response(&raw))
     }
 
     /// Get account transactions
@@ -131,16 +185,18 @@ impl ApiClient {
             limit: Option<u32>,
         }
 
-        self.fetch_api(
-            "account",
-            Params {
-                account_id,
-                filters,
-                resume_token,
-                limit,
-            },
-        )
-        .await
+        let raw = self
+            .fetch_api_raw(
+                "account",
+                Params {
+                    account_id,
+                    filters,
+                    resume_token,
+                    limit,
+                },
+            )
+            .await?;
+        Ok(Self::parse_response(&raw))
     }
 }
 
