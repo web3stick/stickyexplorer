@@ -2,22 +2,15 @@
 // =========================================
 // Shared transaction fetching with caching
 // =========================================
-use crate::api::types::TransactionDetail;
+use crate::api::client::ApiClient;
 use crate::logic::tx_cache::TxCache;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
-use reqwest::Client;
-use serde::Serialize;
 // =========================================
-
-#[derive(Clone, Serialize)]
-pub struct TxParams {
-    pub tx_hashes: Vec<String>,
-}
 
 /// Fetch and parse transactions, using cache for known hashes
 pub async fn fetch_and_parse_transactions(
-    api_base: &str,
+    api_client: &ApiClient,
     hashes: &[String],
     tx_cache: &mut Signal<TxCache>,
 ) -> Vec<(String, ParsedTx)> {
@@ -45,37 +38,26 @@ pub async fn fetch_and_parse_transactions(
     const BATCH_SIZE: usize = 20;
 
     for chunk in missing_hashes.chunks(BATCH_SIZE) {
-        let client = Client::new();
-        let params = TxParams {
-            tx_hashes: chunk.to_vec(),
-        };
+        let api_client = api_client.clone();
+        let hashes_for_fetch = chunk.to_vec();
 
-        match client
-            .post(format!("{}/v0/transactions", api_base))
-            .json(&params)
-            .send()
-            .await
-        {
-            Ok(resp) => {
-                if let Ok(data) = resp.json::<serde_json::Value>().await {
-                    if let Some(tx_array) = data.get("transactions").and_then(|v| v.as_array()) {
-                        let parsed: Vec<(String, ParsedTx)> = tx_array
-                            .iter()
-                            .filter_map(|v| {
-                                serde_json::from_value::<TransactionDetail>(v.clone()).ok()
-                            })
-                            .map(|tx| {
-                                let parsed = parse_transaction(&tx);
-                                (parsed.hash.clone(), parsed.clone())
-                            })
-                            .collect();
+        match api_client.get_transactions(hashes_for_fetch.clone()).await {
+            Ok(data) => {
+                let parsed: Vec<(String, ParsedTx)> = data
+                    .transactions
+                    .into_iter()
+                    .map(|tx| {
+                        let parsed = parse_transaction(&tx);
+                        (parsed.hash.clone(), parsed)
+                    })
+                    .collect();
 
-                        tx_cache.write().insert_batch(parsed.clone());
-                        all_parsed.extend(parsed);
-                    }
-                }
+                tx_cache.write().insert_batch(parsed.clone());
+                all_parsed.extend(parsed);
             }
-            Err(_) => {}
+            Err(_) => {
+                // Silently skip failed batches to match existing behavior
+            }
         }
 
         gloo_timers::future::TimeoutFuture::new(50).await;
