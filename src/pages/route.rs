@@ -140,6 +140,31 @@ pub enum Route {
 
 #[component]
 pub fn Navbar() -> Element {
+    let mut dark_mode = use_context::<Signal<bool>>();
+
+    let toggle_dark_mode = move |_| {
+        let new_value = !dark_mode();
+        dark_mode.set(new_value);
+        // Save to localStorage
+        if let Some(window) = web_sys::window() {
+            if let Ok(Some(storage)) = window.local_storage() {
+                let _ = storage.set_item("dark_mode", if new_value { "true" } else { "false" });
+            }
+        }
+        // Apply/remove dark class on body
+        if let Some(window) = web_sys::window() {
+            if let Some(document) = window.document() {
+                if let Some(body) = document.body() {
+                    if new_value {
+                        let _ = body.class_list().add_1("dark");
+                    } else {
+                        let _ = body.class_list().remove_1("dark");
+                    }
+                }
+            }
+        }
+    };
+
     rsx! {
         header { id: "header",
             div {
@@ -147,7 +172,14 @@ pub fn Navbar() -> Element {
                     Link { to: Route::MainnetHome {}, class: "logo", "STICKYEXPLORER" }
                     button_network {}
                 }
-                div { class: "navbar-right", search_bar {} }
+                div { class: "navbar-right",
+                    button {
+                        class: "dark-mode-toggle",
+                        onclick: toggle_dark_mode,
+                        if dark_mode() { "☀️" } else { "🌙" }
+                    }
+                    search_bar {}
+                }
             }
         }
         main { class: "max-w-7xl mx-auto py-6", Outlet::<Route> {} }
