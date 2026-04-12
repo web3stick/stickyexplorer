@@ -11,6 +11,10 @@ use web_sys::console;
 pub fn button_network() -> Element {
     let mut network_id = use_signal(|| get_stored_network_id());
 
+    use_effect(move || {
+        network_id.set(get_stored_network_id());
+    });
+
     let toggle_network_handler = move |_| {
         let new_network = toggle_network(network_id());
         network_id.set(new_network);
