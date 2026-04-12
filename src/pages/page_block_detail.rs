@@ -2,34 +2,17 @@
 // =========================================
 // Block detail page
 // =========================================
+use crate::api::client::{ApiClient, BlockId};
 use crate::api::types::{BlockDetailResponse, BlockTx};
 use crate::components::ui::{
     account_id, block_hash, block_height, gas_amount, near_amount, time_ago, transaction_hash,
 };
 use crate::logic::network::NetworkId;
 use dioxus::prelude::*;
-use reqwest::Client;
-use serde::Serialize;
 // =========================================
-
-#[derive(Clone, Serialize)]
-#[serde(untagged)]
-enum BlockIdParam {
-    Height(u64),
-    Hash(String),
-}
-
-#[derive(Clone, Serialize)]
-struct BlockParams {
-    block_id: BlockIdParam,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    with_transactions: Option<bool>,
-}
 
 #[component]
 pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
-    let api_base = network.api_base_url();
-
     // State
     let mut block = use_signal(|| Option::<BlockDetailResponse>::None);
     let mut loading = use_signal(|| true);
@@ -47,45 +30,23 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
         visible_count.set(40);
         block.set(None);
 
-        let api_base = api_base.to_string();
-        let block_id = block_id.clone();
+        let block_id_clone = block_id.clone();
+        let network_clone = network.clone();
 
         spawn(async move {
-            let client = Client::new();
-
-            // Determine if block_id is a number (height) or string (hash)
-            let block_id_param = if let Ok(height) = block_id.parse::<u64>() {
-                BlockIdParam::Height(height)
+            let api_client = ApiClient::new(network_clone.api_base_url(), network_clone.as_str());
+            let block_identifier = if let Ok(height) = block_id_clone.parse::<u64>() {
+                BlockId::Height(height)
             } else {
-                BlockIdParam::Hash(block_id.clone())
+                BlockId::Hash(block_id_clone)
             };
 
-            let params = BlockParams {
-                block_id: block_id_param,
-                with_transactions: Some(true),
-            };
-
-            match client
-                .post(format!("{}/v0/block", api_base))
-                .json(&params)
-                .send()
-                .await
-            {
-                Ok(resp) => {
-                    if let Ok(data) = resp.json::<serde_json::Value>().await {
-                        if let Some(_block_data) = data.get("block") {
-                            if let Ok(block_detail) =
-                                serde_json::from_value::<BlockDetailResponse>(data.clone())
-                            {
-                                block.set(Some(block_detail));
-                            }
-                        } else {
-                            error.set(Some("Block not found".to_string()));
-                        }
-                    }
+            match api_client.get_block(block_identifier, true).await {
+                Ok(block_detail) => {
+                    block.set(Some(block_detail));
                 }
                 Err(e) => {
-                    error.set(Some(e.to_string()));
+                    error.set(Some(e));
                 }
             }
             loading.set(false);

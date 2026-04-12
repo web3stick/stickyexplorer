@@ -124,8 +124,7 @@ impl ApiClient {
         #[derive(Serialize)]
         struct Params {
             block_id: String,
-            #[serde(skip_serializing_if = "Option::is_none")]
-            with_transactions: Option<bool>,
+            with_transactions: bool,
         }
         let block_id_str = match block_id {
             BlockId::Height(h) => h.to_string(),
@@ -135,7 +134,7 @@ impl ApiClient {
             "block",
             Params {
                 block_id: block_id_str,
-                with_transactions: Some(with_transactions).filter(|v| *v),
+                with_transactions,
             },
         )
         .await

@@ -2,26 +2,17 @@
 // =========================================
 // Transaction detail page
 // =========================================
+use crate::api::client::ApiClient;
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago, transaction_hash};
 use crate::components::widgets::{get_matching_widgets, WidgetType};
 use crate::logic::network::NetworkId;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
-use reqwest::Client;
-use serde::Serialize;
 // =========================================
-
-#[derive(Clone, Serialize)]
-struct TxParams {
-    tx_hashes: Vec<String>,
-}
 
 #[component]
 pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
-    let api_base = network.api_base_url();
-    let network_val = network;
-
     // State
     let mut tx = use_signal(|| Option::<TransactionDetail>::None);
     let mut parsed_tx = use_signal(|| Option::<ParsedTx>::None);
@@ -39,42 +30,24 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
         tx.set(None);
         parsed_tx.set(None);
 
-        let api_base = api_base.to_string();
-        let tx_hash = tx_hash.clone();
+        let tx_hash_clone = tx_hash.clone();
+        let network_clone = network.clone();
 
         spawn(async move {
-            let client = Client::new();
-            let params = TxParams {
-                tx_hashes: vec![tx_hash],
-            };
+            let api_client = ApiClient::new(network_clone.api_base_url(), network_clone.as_str());
 
-            match client
-                .post(format!("{}/v0/transactions", api_base))
-                .json(&params)
-                .send()
-                .await
-            {
-                Ok(resp) => {
-                    if let Ok(data) = resp.json::<serde_json::Value>().await {
-                        if let Some(transactions) =
-                            data.get("transactions").and_then(|v| v.as_array())
-                        {
-                            if let Some(first_tx) = transactions.first() {
-                                if let Ok(tx_detail) =
-                                    serde_json::from_value::<TransactionDetail>(first_tx.clone())
-                                {
-                                    let parsed = parse_transaction(&tx_detail);
-                                    parsed_tx.set(Some(parsed.clone()));
-                                    tx.set(Some(tx_detail));
-                                }
-                            } else {
-                                error.set(Some("Transaction not found".to_string()));
-                            }
-                        }
+            match api_client.get_transactions(vec![tx_hash_clone]).await {
+                Ok(data) => {
+                    if let Some(first_tx) = data.transactions.first() {
+                        let parsed = parse_transaction(first_tx);
+                        parsed_tx.set(Some(parsed.clone()));
+                        tx.set(Some(first_tx.clone()));
+                    } else {
+                        error.set(Some("Transaction not found".to_string()));
                     }
                 }
                 Err(e) => {
-                    error.set(Some(e.to_string()));
+                    error.set(Some(e));
                 }
             }
             loading.set(false);
@@ -120,7 +93,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                             transaction_hash {
                                 hash: ptx.hash.clone(),
                                 truncate: false,
-                                network: network_val,
+                                network: network,
                             }
                         }
                     }
@@ -130,7 +103,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                         dd {
                             account_id {
                                 account_id: ptx.signer_id.clone(),
-                                network: network_val,
+                                network: network,
                             }
                         }
                     }
@@ -140,7 +113,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                         dd {
                             account_id {
                                 account_id: ptx.receiver_id.clone(),
-                                network: network_val,
+                                network: network,
                             }
                         }
                     }
@@ -150,7 +123,7 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                         dd {
                             block_height {
                                 height: ptx.block_height,
-                                network: network_val,
+                                network: network,
                             }
                         }
                     }
@@ -258,14 +231,14 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                                         span { class: "text-gray-500", "From: " }
                                         account_id {
                                             account_id: receipt.receipt.predecessor_id.clone(),
-                                            network: network_val,
+                                            network: network,
                                         }
                                     }
                                     div {
                                         span { class: "text-gray-500", "To: " }
                                         account_id {
                                             account_id: receipt.receipt.receiver_id.clone(),
-                                            network: network_val,
+                                            network: network,
                                         }
                                     }
                                     div {
