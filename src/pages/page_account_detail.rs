@@ -253,11 +253,17 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                             div { class: "flex flex-col gap-1 text-sm",
                                 div {
                                     span { class: "text-gray-500 text-xs", "Signer: " }
-                                    span { class: "font-mono text-xs", "{parsed.signer_id}" }
+                                    account_id_component {
+                                        account_id: parsed.signer_id.clone(),
+                                        network: Some(network_val),
+                                    }
                                 }
                                 div {
                                     span { class: "text-gray-500 text-xs", "Receiver: " }
-                                    span { class: "font-mono text-xs", "{parsed.receiver_id}" }
+                                    account_id_component {
+                                        account_id: parsed.receiver_id.clone(),
+                                        network: Some(network_val),
+                                    }
                                 }
                                 div {
                                     span { class: "text-gray-500 text-xs", "Action: " }
