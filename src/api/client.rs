@@ -25,25 +25,41 @@ impl ApiClient {
         }
     }
 
-    /// Log request to console
+    /// Log request to console as JSON object (devtools shows collapsible tree)
     fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
         let url = format!("{}/v0/{}", self.base_url, endpoint);
-        let params_json = serde_json::to_string(params).unwrap_or_default();
-        web_sys::console::log_1(&"============".into());
-        web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
-        web_sys::console::log_1(&format!("params: {}", params_json).into());
-        web_sys::console::log_1(&"============".into());
+        let params_json = serde_json::to_value(params).unwrap_or_default();
+        let log_obj = serde_json::json!({
+            "type": "REQUEST",
+            "network": self.network,
+            "endpoint": endpoint,
+            "url": url,
+            "params": params_json,
+        });
+        if let Ok(js_val) = serde_wasm_bindgen::to_value(&log_obj) {
+            web_sys::console::log_1(&js_val);
+        }
     }
 
-    /// Log response to console
+    /// Log response to console as JSON object (devtools shows collapsible tree)
     fn log_response(&self, endpoint: &str, status: u16, body: &str) {
-        web_sys::console::log_1(&"============".into());
-        web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
-        web_sys::console::log_1(&format!("status: {}", status).into());
-        // Log first 500 chars of body
-        let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
-        web_sys::console::log_1(&format!("body: {}", preview).into());
-        web_sys::console::log_1(&"============".into());
+        let body_preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
+        let body_json: serde_json::Value = if body.len() <= 500 {
+            serde_json::from_str(body).unwrap_or(serde_json::Value::String(body.to_string()))
+        } else {
+            serde_json::Value::String(body_preview.clone())
+        };
+        let log_obj = serde_json::json!({
+            "type": "RESPONSE",
+            "network": self.network,
+            "endpoint": endpoint,
+            "url": format!("{}/v0/{}", self.base_url, endpoint),
+            "status": status,
+            "body": body_json,
+        });
+        if let Ok(js_val) = serde_wasm_bindgen::to_value(&log_obj) {
+            web_sys::console::log_1(&js_val);
+        }
     }
 
     /// Fetch from API endpoint
@@ -67,7 +83,16 @@ impl ApiClient {
         let parsed: T = match serde_json::from_str(&body_text) {
             Ok(v) => v,
             Err(e) => {
-                web_sys::console::log_1(&format!("JSON parse error: {}", e).into());
+                let err_obj = serde_json::json!({
+                    "type": "ERROR",
+                    "network": self.network,
+                    "endpoint": endpoint,
+                    "error": e.to_string(),
+                    "body_preview": &body_text[..body_text.len().min(200)],
+                });
+                if let Ok(js_val) = serde_wasm_bindgen::to_value(&err_obj) {
+                    web_sys::console::log_1(&js_val);
+                }
                 return Err(e.to_string());
             }
         };

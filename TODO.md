@@ -11,7 +11,7 @@
 - [x] add settings for light/dark mode and maybe other settings — dark mode toggle with localStorage persistence (Apr 2026)
 - [ ] transaction support for certain contracts, or maybe all?
 - [x] need to froce word line breaks when really long account id — overflow-wrap + word-break added to account_id component (Apr 2026)
-
+- [x] make console logs structured JSON objects instead of strings — serde-wasm-bindgen used to log REQUEST/RESPONSE as collapsible JSON trees in devtools (Apr 2026)
 
 ---
 
