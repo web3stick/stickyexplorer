@@ -71,3 +71,21 @@
         justify-content: flex-end;
     }
 }
+
+/* =========================================
+   Dark Mode
+   ========================================= */
+body.dark #header > div,
+.dark #header > div {
+    border-bottom-color: #333;
+}
+
+body.dark #header a.logo,
+.dark #header a.logo {
+    color: #8CA2F5;
+}
+
+body.dark .navbar-left,
+.dark .navbar-left {
+    color: #e0e0e0;
+}
