@@ -7,10 +7,10 @@
 - [x] cleaner code — refactored parse_transaction.rs into 4 focused modules (Apr 2026)
 - [ ] inifinit scroll?? not really needed
 - [ ] more links "Signer	Receiver" should be links on the account page
-- [ ] in case of route errros redirect to home page?
+- [x] in case of route errros redirect to home page? — catchall '/:catchall' route redirects to home (Apr 2026)
 - [ ] add settings for light/dark mode and maybe other settings
 - [ ] transaction support for certain contracts, or maybe all?
-- [ ] need to froce word line breaks when really long account id
+- [x] need to froce word line breaks when really long account id — overflow-wrap + word-break added to account_id component (Apr 2026)
 
 
 ---
