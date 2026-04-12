@@ -121,6 +121,9 @@ impl ApiClient {
         block_id: BlockId,
         with_transactions: bool,
     ) -> Result<BlockDetailResponse, String> {
+        // Use an untagged enum to serialize block_id correctly:
+        // - Height variant serializes as a raw number (e.g., 100000000)
+        // - Hash variant serializes as a string (e.g., "abc123")
         #[derive(Serialize)]
         #[serde(untagged)]
         enum BlockIdParam {
@@ -132,18 +135,17 @@ impl ApiClient {
             block_id: BlockIdParam,
             with_transactions: bool,
         }
-        let block_id_param = match block_id {
-            BlockId::Height(h) => BlockIdParam::Height(h),
-            BlockId::Hash(h) => BlockIdParam::Hash(h),
-        };
-        self.fetch_api(
-            "block",
-            Params {
-                block_id: block_id_param,
+        let params = match block_id {
+            BlockId::Height(h) => Params {
+                block_id: BlockIdParam::Height(h),
                 with_transactions,
             },
-        )
-        .await
+            BlockId::Hash(h) => Params {
+                block_id: BlockIdParam::Hash(h),
+                with_transactions,
+            },
+        };
+        self.fetch_api("block", params).await
     }
 
     /// Get transactions by hashes
