@@ -206,6 +206,111 @@
 }
 
 /* =========================================
+   Dark Mode
+   ========================================= */
+body.dark .detail-card,
+.dark .detail-card {
+    background-color: #16213e;
+    border-color: #333;
+}
+
+body.dark .detail-card dl > div,
+.dark .detail-card dl > div {
+    background-color: #16213e;
+    border-bottom-color: #333;
+}
+
+body.dark .detail-card dt,
+.dark .detail-card dt {
+    color: #a0a0a0;
+}
+
+body.dark .section-heading,
+.dark .section-heading {
+    color: #e0e0e0;
+}
+
+body.dark .tx-list-header,
+.dark .tx-list-header {
+    color: #b0b0b0;
+}
+
+body.dark .receipt-card,
+.dark .receipt-card {
+    background-color: #16213e;
+    border-color: #333;
+}
+
+body.dark .transfer-item,
+.dark .transfer-item {
+    color: #b0b0b0;
+}
+
+body.dark .account-overview,
+.dark .account-overview {
+    background-color: #16213e;
+    border-color: #333;
+}
+
+body.dark .account-overview h2,
+.dark .account-overview h2 {
+    color: #e0e0e0;
+}
+
+body.dark .stat-label,
+.dark .stat-label {
+    color: #a0a0a0;
+}
+
+body.dark .stat-value,
+.dark .stat-value {
+    color: #e0e0e0;
+}
+
+body.dark .json-toggle-button,
+.dark .json-toggle-button {
+    color: #a0a0a0;
+    border-bottom-color: #333;
+}
+
+body.dark .json-toggle-button:hover,
+.dark .json-toggle-button:hover {
+    background-color: #1e1e3f;
+    color: #e0e0e0;
+}
+
+body.dark .json-container,
+.dark .json-container {
+    background-color: #1e1e3f;
+    border-color: #333;
+}
+
+body.dark .json-container pre,
+.dark .json-container pre {
+    color: #e0e0e0;
+}
+
+body.dark .json-highlighted .json-string,
+.dark .json-highlighted .json-string {
+    color: #6ee7b7;
+}
+
+body.dark .json-highlighted .json-number,
+.dark .json-highlighted .json-number {
+    color: #93c5fd;
+}
+
+body.dark .json-highlighted .json-boolean,
+.dark .json-highlighted .json-boolean {
+    color: #c4b5fd;
+}
+
+body.dark .json-highlighted .json-null,
+.dark .json-highlighted .json-null {
+    color: #fca5a5;
+}
+
+/* =========================================
    JSON Container
    ========================================= */
 .json-toggle-button {
@@ -252,6 +357,23 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
+}
+
+/* JSON Syntax Highlighting */
+.json-highlighted .json-string {
+    color: #059669; /* emerald-600 - keys and string values */
+}
+
+.json-highlighted .json-number {
+    color: #2563eb; /* blue-600 - numbers */
+}
+
+.json-highlighted .json-boolean {
+    color: #9333ea; /* purple-600 - booleans */
+}
+
+.json-highlighted .json-null {
+    color: #dc2626; /* red-600 - null */
 }
 
 /* =========================================

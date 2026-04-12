@@ -4,15 +4,13 @@
 // =========================================
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, near_amount};
+use crate::utils::highlight_json::highlight_json;
 use crate::utils::parse_transaction::parse_transaction;
 use dioxus::prelude::*;
 // =========================================
 
 /// Widget match function type
 pub type MatchFn = fn(&TransactionDetail) -> bool;
-
-/// Widget component type
-pub type WidgetFn = fn(Element, &TransactionDetail) -> Element;
 
 /// Widget definition
 pub struct Widget {
@@ -132,10 +130,11 @@ pub fn render_near_transfer(tx: &TransactionDetail) -> Element {
     }
 }
 
-/// Default widget - shows raw JSON
-pub fn render_default_widget(tx: &TransactionDetail) -> Element {
+/// Default widget - shows raw JSON (must be a component to use hooks)
+#[component]
+pub fn DefaultWidget(tx_json: String) -> Element {
     let mut open = use_signal(|| false); // Closed by default
-    let tx_json = serde_json::to_string_pretty(tx).unwrap_or_default();
+    let highlighted = highlight_json(&tx_json);
 
     rsx! {
         div { class: "mt-6 rounded-lg border border-gray-200 bg-white",
@@ -144,8 +143,8 @@ pub fn render_default_widget(tx: &TransactionDetail) -> Element {
             }
             if open() {
                 div { class: "border-t border-gray-100 json-wrapper",
-                    div { class: "json-container",
-                        pre { "{tx_json}" }
+                    div { class: "json-container json-highlighted",
+                        pre { dangerous_inner_html: "{highlighted}" }
                     }
                 }
             }
@@ -167,12 +166,6 @@ pub fn get_matching_widgets(tx: &TransactionDetail) -> Vec<&'static Widget> {
             match_fn: match_ft_transfer,
             render: render_ft_transfer,
             widget_type: WidgetType::Explanation,
-        },
-        Widget {
-            id: "default",
-            match_fn: |_| true,
-            render: render_default_widget,
-            widget_type: WidgetType::Utility,
         },
     ];
 

@@ -169,3 +169,113 @@ th, td {
 .block { display: block; }
 .inline { display: inline; }
 .inline-flex { display: inline-flex; }
+
+/* =========================================
+   Dark mode toggle button
+   ========================================= */
+.dark-mode-toggle {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dark-mode-toggle:hover {
+    background: #f3f4f6;
+}
+
+/* =========================================
+   Dark mode styles
+   ========================================= */
+body.dark,
+.dark body {
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+}
+
+body.dark .bg-white,
+body.dark .bg-surface,
+.dark .bg-white,
+.dark .bg-surface {
+    background-color: #16213e;
+}
+
+body.dark #header a.logo,
+.dark #header a.logo {
+    color: #8CA2F5;
+}
+
+body.dark #header > div,
+.dark #header > div {
+    border-bottom-color: #333;
+}
+
+body.dark button,
+.dark button {
+    border-color: #333;
+}
+
+body.dark button:hover:not(:disabled),
+.dark button:hover:not(:disabled) {
+    background-color: #2a2a4a;
+}
+
+body.dark .dark-mode-toggle:hover,
+.dark .dark-mode-toggle:hover {
+    background: #2a2a4a;
+}
+
+body.dark .text-gray-500,
+.dark .text-gray-500 {
+    color: #a0a0a0;
+}
+
+body.dark .text-gray-600,
+.dark .text-gray-600 {
+    color: #b0b0b0;
+}
+
+body.dark a,
+.dark a {
+    color: #8CA2F5;
+}
+
+body.dark table,
+.dark table {
+    border-color: #333;
+}
+
+body.dark th,
+body.dark td,
+.dark th,
+.dark td {
+    border-color: #333;
+}
+
+body.dark .bg-gray-50,
+.dark .bg-gray-50 {
+    background-color: #1e1e3f;
+}
+
+body.dark .bg-gray-100,
+.dark .bg-gray-100 {
+    background-color: #252547;
+}
+
+body.dark .border-gray-100,
+.dark .border-gray-100 {
+    border-color: #333;
+}
+
+body.dark .border-gray-200,
+.dark .border-gray-200 {
+    border-color: #444;
+}
+
+body.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-50:hover {
+    background-color: #252547;
+}

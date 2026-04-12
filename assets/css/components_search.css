@@ -57,3 +57,39 @@
     color: #9ca3af;
     pointer-events: none;
 }
+
+/* =========================================
+   Dark Mode
+   ========================================= */
+body.dark .search-form input,
+.dark .search-form input {
+    background-color: #16213e;
+    border-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark .search-form input::placeholder,
+.dark .search-form input::placeholder {
+    color: #888;
+}
+
+body.dark .search-form input:focus,
+.dark .search-form input:focus {
+    border-color: #8CA2F5;
+}
+
+body.dark .search-form button,
+.dark .search-form button {
+    background-color: #8CA2F5;
+    color: #ffffff;
+}
+
+body.dark .search-form button:hover,
+.dark .search-form button:hover {
+    background-color: #7a91e8;
+}
+
+body.dark .search-hint,
+.dark .search-hint {
+    color: #888;
+}

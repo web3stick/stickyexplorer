@@ -144,3 +144,66 @@ h1 {
     color: #8CA2F5;
     font-weight: 500;
 }
+
+/* =========================================
+   Dark Mode
+   ========================================= */
+body.dark .table-container,
+.dark .table-container {
+    background-color: #16213e;
+    border-color: #333;
+}
+
+body.dark .table-container thead tr,
+.dark .table-container thead tr {
+    background-color: #1e1e3f;
+    border-bottom-color: #333;
+}
+
+body.dark .table-container thead th,
+.dark .table-container thead th {
+    color: #a0a0a0;
+}
+
+body.dark .table-container tbody tr,
+.dark .table-container tbody tr {
+    border-bottom-color: #252547;
+}
+
+body.dark .table-container tbody tr:hover,
+.dark .table-container tbody tr:hover {
+    background-color: #1e1e3f;
+}
+
+body.dark .mobile-cards,
+.dark .mobile-cards {
+    background-color: #16213e;
+    border-color: #333;
+}
+
+body.dark .mobile-cards > div,
+.dark .mobile-cards > div {
+    border-bottom-color: #252547;
+}
+
+body.dark .load-more-button,
+.dark .load-more-button {
+    background-color: #8CA2F5;
+    color: #ffffff;
+}
+
+body.dark .load-more-button:hover:not(:disabled),
+.dark .load-more-button:hover:not(:disabled) {
+    background-color: #7a91e8;
+}
+
+body.dark .empty-state,
+.dark .empty-state {
+    color: #a0a0a0;
+}
+
+body.dark .greeting-banner,
+.dark .greeting-banner {
+    background-color: #3d3a00;
+    color: #d4d4aa;
+}
