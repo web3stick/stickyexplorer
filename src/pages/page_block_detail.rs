@@ -10,6 +10,7 @@ use crate::logic::network::NetworkId;
 use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
+use web_sys::console;
 // =========================================
 
 #[derive(Clone, Serialize)]
@@ -38,6 +39,11 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
 
     // Track current block_id to detect changes
     let mut current_block_id = use_signal(|| String::new());
+
+    // Log page load
+    use_effect(move || {
+        console::log_1(&"============ PAGE LOADED: BLOCK_DETAIL ============".into());
+    });
 
     // Fetch data when block_id changes
     if current_block_id() != block_id {

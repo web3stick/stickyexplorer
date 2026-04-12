@@ -5,7 +5,20 @@
 use crate::api::types::*;
 use reqwest::Client;
 use serde::Serialize;
+use web_sys::console;
 // =========================================
+
+fn log_to_console(msg: &str) {
+    console::log_1(&msg.into());
+}
+
+fn get_network(base_url: &str) -> &str {
+    if base_url.contains("testnet") {
+        "testnet"
+    } else {
+        "mainnet"
+    }
+}
 
 /// API client for FastNear
 pub struct ApiClient {
@@ -28,7 +41,17 @@ impl ApiClient {
         endpoint: &str,
         body: impl Serialize,
     ) -> Result<T, reqwest::Error> {
+        let network = get_network(&self.base_url);
         let url = format!("{}/v0/{}", self.base_url, endpoint);
+        let body_json = serde_json::to_string(&body).unwrap_or_default();
+
+        // Log API request
+        let request_log = format!(
+            "============ API REQUEST: {} | network: {} | params: {} ============",
+            endpoint, network, body_json
+        );
+        log_to_console(&request_log);
+
         let response = self
             .client
             .post(&url)
@@ -36,6 +59,13 @@ impl ApiClient {
             .send()
             .await?
             .error_for_status()?;
+
+        let response_log = format!(
+            "============ API RESPONSE: {} | network: {} | OK ============",
+            endpoint, network
+        );
+        log_to_console(&response_log);
+
         response.json().await
     }
 

@@ -10,6 +10,7 @@ use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
+use web_sys::console;
 // =========================================
 
 #[derive(Clone, Serialize)]
@@ -30,6 +31,11 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
 
     // Track current tx_hash to detect changes
     let mut current_tx_hash = use_signal(|| String::new());
+
+    // Log page load
+    use_effect(move || {
+        console::log_1(&"============ PAGE LOADED: TX_DETAIL ============".into());
+    });
 
     // Fetch data when tx_hash changes
     if current_tx_hash() != tx_hash {

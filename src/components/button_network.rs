@@ -23,7 +23,7 @@ pub fn button_network() -> Element {
             console::error_1(&e);
         }
 
-        console::log_1(&format!("{}", new_network.as_str()).into());
+        console::log_1(&format!("============ NETWORK SWITCHED: {} ============", new_network.as_str()).into());
     };
 
     let button_class = match network_id() {
