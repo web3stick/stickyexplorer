@@ -5,7 +5,21 @@
 use crate::api::types::*;
 use reqwest::Client;
 use serde::Serialize;
+use wasm_bindgen::prelude::*;
+use web_sys::console;
 // =========================================
+
+fn log_to_console(msg: &str) {
+    console::log_1(&msg.into());
+}
+
+fn get_network(base_url: &str) -> &str {
+    if base_url.contains("testnet") {
+        "testnet"
+    } else {
+        "mainnet"
+    }
+}
 
 /// API client for FastNear
 pub struct ApiClient {
@@ -28,15 +42,70 @@ impl ApiClient {
         endpoint: &str,
         body: impl Serialize,
     ) -> Result<T, reqwest::Error> {
+        let network = get_network(&self.base_url);
         let url = format!("{}/v0/{}", self.base_url, endpoint);
+        let body_json = serde_json::to_string(&body).unwrap_or_default();
+
+        // Log API request
+        let request_log = format!(
+            "============ API REQUEST: {} | network: {} | params: {} ============",
+            endpoint, network, body_json
+        );
+        log_to_console(&request_log);
+
         let response = self
             .client
             .post(&url)
             .json(&body)
             .send()
-            .await?
-            .error_for_status()?;
-        response.json().await
+            .await?;
+
+        let status = response.status();
+        let response_text = response.text().await.unwrap_or_default();
+
+        if status.is_success() {
+            // Log success response
+            let response_log = format!(
+                "============ API RESPONSE: {} | network: {} | OK ============",
+                endpoint, network
+            );
+            log_to_console(&response_log);
+            if !response_text.is_empty() {
+                let summary = if response_text.len() > 200 {
+                    format!("{}... (truncated)", &response_text[..200])
+                } else {
+                    response_text.clone()
+                };
+                log_to_console(&summary);
+            }
+
+            // Parse JSON from response text
+            serde_json::from_str(&response_text).map_err(|e| {
+                let error_log = format!(
+                    "============ API RESPONSE: {} | network: {} | ERROR ============\nFailed to parse JSON: {}",
+                    endpoint, network, e
+                );
+                log_to_console(&error_log);
+                if !response_text.is_empty() {
+                    log_to_console(&response_text);
+                }
+                reqwest::Error::from(std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+            })
+        } else {
+            // Log error response
+            let response_log = format!(
+                "============ API RESPONSE: {} | network: {} | ERROR ============",
+                endpoint, network
+            );
+            log_to_console(&response_log);
+            if !response_text.is_empty() {
+                log_to_console(&response_text);
+            }
+            Err(reqwest::Error::from(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("HTTP error: {}", status.as_u16()),
+            )))
+        }
     }
 
     /// Get blocks

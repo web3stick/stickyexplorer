@@ -10,6 +10,7 @@ use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
+use web_sys::console;
 // =========================================
 
 const BATCH_SIZE: u32 = 80;
@@ -46,6 +47,11 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
 
     // Global cache for faster navigation
     let tx_cache = use_signal(|| TxCache::new());
+
+    // Log page load
+    use_effect(move || {
+        console::log_1(&"============ PAGE LOADED: ACCOUNT_DETAIL ============".into());
+    });
 
     // Track current account to detect changes
     let mut current_account = use_signal(|| String::new());

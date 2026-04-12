@@ -8,6 +8,7 @@ use crate::logic::network::get_stored_network_id;
 use dioxus::prelude::*;
 use reqwest::Client;
 use serde::Serialize;
+use web_sys::console;
 // =========================================
 
 const BATCH_SIZE: u32 = 80;
@@ -33,6 +34,11 @@ pub fn Home() -> Element {
 
     let network_id = get_stored_network_id();
     let api_base = network_id.api_base_url();
+
+    // Log page load
+    use_effect(move || {
+        console::log_1(&"============ PAGE LOADED: HOME ============".into());
+    });
 
     // Initial load
     use_effect(move || {
