@@ -5,7 +5,7 @@
 use crate::api::client::ApiClient;
 use crate::api::types::BlockHeader;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago};
-use crate::logic::network::get_stored_network_id;
+use crate::logic::network::{get_stored_network_id, NetworkId};
 use dioxus::prelude::*;
 // =========================================
 
@@ -19,15 +19,16 @@ pub fn Home() -> Element {
     let mut resume_token = use_signal(|| Option::<u64>::None);
     let mut has_more = use_signal(|| true);
     let mut loading_more = use_signal(|| false);
+    let mut network_id = use_signal(|| get_stored_network_id());
 
     // Initial load
     use_effect(move || {
+        let net = network_id();
         spawn(async move {
             loading.set(true);
             error.set(None);
 
-            let network_id = get_stored_network_id();
-            let api_client = ApiClient::new(network_id.api_base_url(), network_id.as_str());
+            let api_client = ApiClient::new(net.api_base_url(), net.as_str());
 
             match api_client
                 .get_blocks(Some(BATCH_SIZE), Some(true), None, None)
@@ -57,12 +58,12 @@ pub fn Home() -> Element {
             return;
         }
 
+        let net = network_id();
         let token = resume_token();
         loading_more.set(true);
 
         spawn(async move {
-            let network_id = get_stored_network_id();
-            let api_client = ApiClient::new(network_id.api_base_url(), network_id.as_str());
+            let api_client = ApiClient::new(net.api_base_url(), net.as_str());
 
             match api_client
                 .get_blocks(Some(BATCH_SIZE), Some(true), token, None)
@@ -120,14 +121,14 @@ pub fn Home() -> Element {
                                 tr { key: "{block.block_hash}",
                                     td {
                                         span { class: "font-medium",
-                                            block_height { height: block.block_height }
+                                            block_height { height: block.block_height, network: network_id() }
                                         }
                                     }
                                     td { class: "text-gray-500",
                                         time_ago { timestamp_ns: block.block_timestamp.clone() }
                                     }
                                     td {
-                                        account_id { account_id: block.author_id.clone() }
+                                        account_id { account_id: block.author_id.clone(), network: network_id() }
                                     }
                                     td { class: "text-right", "{block.num_transactions}" }
                                     td { class: "text-right", "{block.num_receipts}" }
@@ -146,7 +147,7 @@ pub fn Home() -> Element {
                         div { key: "{block.block_hash}",
                             div { class: "flex items-center justify-between gap-2 mb-1",
                                 span { class: "font-medium",
-                                    block_height { height: block.block_height }
+                                    block_height { height: block.block_height, network: network_id() }
                                 }
                                 span { class: "text-xs text-gray-500",
                                     time_ago { timestamp_ns: block.block_timestamp.clone() }
@@ -154,7 +155,7 @@ pub fn Home() -> Element {
                             }
                             div { class: "text-sm mb-1",
                                 span { class: "text-gray-500 text-xs", "Author: " }
-                                account_id { account_id: block.author_id.clone() }
+                                account_id { account_id: block.author_id.clone(), network: network_id() }
                             }
                             div { class: "grid grid-cols-3 gap-2 text-xs",
                                 div {
