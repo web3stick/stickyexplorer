@@ -117,7 +117,7 @@ pub fn Home() -> Element {
                         }
                         tbody {
                             for block in blocks_snapshot.iter() {
-                                tr {
+                                tr { key: "{block.block_hash}",
                                     td {
                                         span { class: "font-medium",
                                             block_height { height: block.block_height }
@@ -143,7 +143,7 @@ pub fn Home() -> Element {
                 // Mobile cards
                 div { class: "mobile-cards",
                     for block in blocks_snapshot.iter() {
-                        div {
+                        div { key: "{block.block_hash}",
                             div { class: "flex items-center justify-between gap-2 mb-1",
                                 span { class: "font-medium",
                                     block_height { height: block.block_height }

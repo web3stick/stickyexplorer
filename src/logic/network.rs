@@ -76,11 +76,20 @@ impl std::fmt::Display for NetworkId {
 
 /// Get the stored network ID from localStorage
 pub fn get_stored_network_id() -> NetworkId {
+    // Only access localStorage on the client side — returns None during SSR/hydration
+    if !is_browser() {
+        return NetworkId::Mainnet;
+    }
     get_web_storage()
         .and_then(|storage| storage.get_item(NETWORK_STORAGE_KEY).ok())
         .flatten()
         .map(|value| NetworkId::from_str(&value))
         .unwrap_or(NetworkId::Mainnet)
+}
+
+/// Check if we're running in a browser (vs SSR)
+fn is_browser() -> bool {
+    web_sys::window().is_some()
 }
 
 /// Save the network ID to localStorage
