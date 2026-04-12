@@ -102,7 +102,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
             h1 { class: "mb-4 text-xl font-bold",
                 "Block #"
                 Link {
-                    to: format!("/block/{block_height_val}"),
+                    to: format!("/{}/block/{}", network_val.as_str(), block_height_val),
                     class: "hover:underline",
                     "{block_height_val}"
                 }
