@@ -25,40 +25,47 @@ impl ApiClient {
         }
     }
 
-    /// Log request to console as JSON object (devtools shows collapsible tree)
+    /// Log request to console — metadata as JSON object, params as separate JSON log
     fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
         let url = format!("{}/v0/{}", self.base_url, endpoint);
         let params_json = serde_json::to_value(params).unwrap_or_default();
-        let log_obj = serde_json::json!({
+        // Metadata log
+        let meta_obj = serde_json::json!({
             "type": "REQUEST",
             "network": self.network,
             "endpoint": endpoint,
             "url": url,
-            "params": params_json,
         });
-        if let Ok(js_val) = serde_wasm_bindgen::to_value(&log_obj) {
+        if let Ok(js_val) = serde_wasm_bindgen::to_value(&meta_obj) {
+            web_sys::console::log_1(&js_val);
+        }
+        // Params log — the actual JSON body as its own log entry
+        if let Ok(js_val) = serde_wasm_bindgen::to_value(&params_json) {
             web_sys::console::log_1(&js_val);
         }
     }
 
-    /// Log response to console as JSON object (devtools shows collapsible tree)
+    /// Log response to console — metadata as JSON object, body as separate JSON log
     fn log_response(&self, endpoint: &str, status: u16, body: &str) {
-        let body_preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
-        let body_json: serde_json::Value = if body.len() <= 500 {
-            serde_json::from_str(body).unwrap_or(serde_json::Value::String(body.to_string()))
-        } else {
-            serde_json::Value::String(body_preview.clone())
-        };
-        let log_obj = serde_json::json!({
+        // Metadata log
+        let meta_obj = serde_json::json!({
             "type": "RESPONSE",
             "network": self.network,
             "endpoint": endpoint,
             "url": format!("{}/v0/{}", self.base_url, endpoint),
             "status": status,
-            "body": body_json,
         });
-        if let Ok(js_val) = serde_wasm_bindgen::to_value(&log_obj) {
+        if let Ok(js_val) = serde_wasm_bindgen::to_value(&meta_obj) {
             web_sys::console::log_1(&js_val);
+        }
+        // Body log — parse as JSON so devtools shows collapsible tree
+        if let Ok(body_val) = serde_json::from_str::<serde_json::Value>(body) {
+            if let Ok(js_val) = serde_wasm_bindgen::to_value(&body_val) {
+                web_sys::console::log_1(&js_val);
+            }
+        } else {
+            // Not JSON, log as string
+            web_sys::console::log_1(&body.into());
         }
     }
 
