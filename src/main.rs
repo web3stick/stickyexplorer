@@ -14,6 +14,11 @@ fn main() {
 // =========================================
 #[component]
 fn App() -> Element {
+    // hello log
+    use_effect(|| {
+        web_sys::console::log_1(&"👋 hello this app was made with ❤️ by sleet.near".into());
+    });
+
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
