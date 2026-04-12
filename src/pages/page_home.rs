@@ -139,6 +139,40 @@ pub fn Home() -> Element {
                         }
                     }
                 }
+
+                // Mobile cards
+                div { class: "mobile-cards",
+                    for block in blocks_snapshot.iter() {
+                        div {
+                            div { class: "flex items-center justify-between gap-2 mb-1",
+                                span { class: "font-medium",
+                                    block_height { height: block.block_height }
+                                }
+                                span { class: "text-xs text-gray-500",
+                                    time_ago { timestamp_ns: block.block_timestamp.clone() }
+                                }
+                            }
+                            div { class: "text-sm mb-1",
+                                span { class: "text-gray-500 text-xs", "Author: " }
+                                account_id { account_id: block.author_id.clone() }
+                            }
+                            div { class: "grid grid-cols-3 gap-2 text-xs",
+                                div {
+                                    span { class: "text-gray-500", "Txns: " }
+                                    "{block.num_transactions}"
+                                }
+                                div {
+                                    span { class: "text-gray-500", "Receipts: " }
+                                    "{block.num_receipts}"
+                                }
+                                div {
+                                    span { class: "text-gray-500", "Gas: " }
+                                    gas_amount { gas: block.gas_burnt.parse().unwrap_or(0) }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if !loading() && blocks_empty {
