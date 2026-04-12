@@ -3,7 +3,7 @@
 // Account detail page with transactions
 // =========================================
 use crate::api::client::ApiClient;
-use crate::api::types::{AccountFilters, AccountTx};
+use crate::api::types::AccountFilters;
 use crate::components::ui::{account_id as account_id_component, time_ago, transaction_hash};
 use crate::logic::network::NetworkId;
 use crate::logic::tx_cache::TxCache;
@@ -186,13 +186,13 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                                     td {
                                         account_id_component {
                                             account_id: parsed.signer_id.clone(),
-                                            network: Some(network_val),
+                                            network: network,
                                         }
                                     }
                                     td {
                                         account_id_component {
                                             account_id: parsed.receiver_id.clone(),
-                                            network: Some(network_val),
+                                            network: network,
                                         }
                                     }
                                     td {
@@ -255,14 +255,14 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                                     span { class: "text-gray-500 text-xs", "Signer: " }
                                     account_id_component {
                                         account_id: parsed.signer_id.clone(),
-                                        network: Some(network_val),
+                                        network: network,
                                     }
                                 }
                                 div {
                                     span { class: "text-gray-500 text-xs", "Receiver: " }
                                     account_id_component {
                                         account_id: parsed.receiver_id.clone(),
-                                        network: Some(network_val),
+                                        network: network,
                                     }
                                 }
                                 div {
