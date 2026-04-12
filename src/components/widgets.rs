@@ -4,6 +4,7 @@
 // =========================================
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, near_amount};
+use crate::utils::highlight_json::highlight_json;
 use crate::utils::parse_transaction::parse_transaction;
 use dioxus::prelude::*;
 // =========================================
@@ -136,6 +137,7 @@ pub fn render_near_transfer(tx: &TransactionDetail) -> Element {
 pub fn render_default_widget(tx: &TransactionDetail) -> Element {
     let mut open = use_signal(|| false); // Closed by default
     let tx_json = serde_json::to_string_pretty(tx).unwrap_or_default();
+    let highlighted = highlight_json(&tx_json);
 
     rsx! {
         div { class: "mt-6 rounded-lg border border-gray-200 bg-white",
@@ -144,8 +146,8 @@ pub fn render_default_widget(tx: &TransactionDetail) -> Element {
             }
             if open() {
                 div { class: "border-t border-gray-100 json-wrapper",
-                    div { class: "json-container",
-                        pre { "{tx_json}" }
+                    div { class: "json-container json-highlighted",
+                        pre { dangerous_inner_html: "{highlighted}" }
                     }
                 }
             }

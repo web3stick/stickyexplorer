@@ -254,6 +254,23 @@
     max-width: 100%;
 }
 
+/* JSON Syntax Highlighting */
+.json-highlighted .json-string {
+    color: #059669; /* emerald-600 - keys and string values */
+}
+
+.json-highlighted .json-number {
+    color: #2563eb; /* blue-600 - numbers */
+}
+
+.json-highlighted .json-boolean {
+    color: #9333ea; /* purple-600 - booleans */
+}
+
+.json-highlighted .json-null {
+    color: #dc2626; /* red-600 - null */
+}
+
 /* =========================================
    Widget Padding
    ========================================= */
