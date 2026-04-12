@@ -3,8 +3,8 @@
 // Account detail page with transactions
 // =========================================
 use crate::api::client::ApiClient;
-use crate::api::types::AccountFilters;
-use crate::components::ui::{time_ago, transaction_hash};
+use crate::api::types::{AccountFilters, AccountTx};
+use crate::components::ui::{account_id as account_id_component, time_ago, transaction_hash};
 use crate::logic::network::NetworkId;
 use crate::logic::tx_cache::TxCache;
 use crate::pages::fetch_transactions::fetch_and_parse_transactions;
@@ -184,10 +184,16 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                                         time_ago { timestamp_ns: atx.tx_block_timestamp.clone() }
                                     }
                                     td {
-                                        span { class: "font-mono text-xs", "{parsed.signer_id}" }
+                                        account_id_component {
+                                            account_id: parsed.signer_id.clone(),
+                                            network: Some(network_val),
+                                        }
                                     }
                                     td {
-                                        span { class: "font-mono text-xs", "{parsed.receiver_id}" }
+                                        account_id_component {
+                                            account_id: parsed.receiver_id.clone(),
+                                            network: Some(network_val),
+                                        }
                                     }
                                     td {
                                         if let Some(first_action) = parsed.actions.first() {
