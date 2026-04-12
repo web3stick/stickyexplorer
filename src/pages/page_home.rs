@@ -92,71 +92,56 @@ pub fn Home() -> Element {
         };
     }
 
+    // Performance optimization: snapshot blocks signal once to avoid repeated
+    // signal reads in the render path. This reduces overhead for large lists.
+    let blocks_snapshot = blocks();
+    let blocks_empty = blocks_snapshot.is_empty();
+
     rsx! {
         div {
             h1 { class: "mb-4 text-xl font-bold", "Latest Blocks" }
 
-            // Desktop table
-            div { class: "table-container",
-                table {
-                    thead {
-                        tr {
-                            th { "Height" }
-                            th { "Time" }
-                            th { "Author" }
-                            th { class: "text-right", "Txns" }
-                            th { class: "text-right", "Receipts" }
-                            th { class: "text-right", "Gas Used" }
-                        }
-                    }
-                    tbody {
-                        for block in blocks() {
+            // Desktop table (mobile cards handled via CSS responsive design)
+            if !blocks_empty {
+                div { class: "table-container",
+                    table {
+                        thead {
                             tr {
-                                td {
-                                    span { class: "font-medium",
-                                        block_height { height: block.block_height }
+                                th { "Height" }
+                                th { "Time" }
+                                th { "Author" }
+                                th { class: "text-right", "Txns" }
+                                th { class: "text-right", "Receipts" }
+                                th { class: "text-right", "Gas Used" }
+                            }
+                        }
+                        tbody {
+                            for block in blocks_snapshot.iter() {
+                                tr {
+                                    td {
+                                        span { class: "font-medium",
+                                            block_height { height: block.block_height }
+                                        }
+                                    }
+                                    td { class: "text-gray-500",
+                                        time_ago { timestamp_ns: block.block_timestamp.clone() }
+                                    }
+                                    td {
+                                        account_id { account_id: block.author_id.clone() }
+                                    }
+                                    td { class: "text-right", "{block.num_transactions}" }
+                                    td { class: "text-right", "{block.num_receipts}" }
+                                    td { class: "text-right",
+                                        gas_amount { gas: block.gas_burnt.parse().unwrap_or(0) }
                                     }
                                 }
-                                td { class: "text-gray-500",
-                                    time_ago { timestamp_ns: block.block_timestamp.clone() }
-                                }
-                                td {
-                                    account_id { account_id: block.author_id.clone() }
-                                }
-                                td { class: "text-right", "{block.num_transactions}" }
-                                td { class: "text-right", "{block.num_receipts}" }
-                                td { class: "text-right",
-                                    gas_amount { gas: block.gas_burnt.parse().unwrap_or(0) }
-                                }
                             }
                         }
                     }
                 }
             }
 
-            // Mobile cards
-            div { class: "mobile-cards",
-                for block in blocks() {
-                    div {
-                        div { class: "flex items-center justify-between gap-2 mb-1",
-                            span { class: "font-medium text-sm",
-                                block_height { height: block.block_height }
-                            }
-                            span { class: "text-xs text-gray-500 shrink-0",
-                                time_ago { timestamp_ns: block.block_timestamp.clone() }
-                            }
-                        }
-                        div { class: "flex items-center justify-between gap-2",
-                            account_id { account_id: block.author_id.clone() }
-                            span { class: "text-xs text-gray-500 shrink-0",
-                                "{block.num_transactions} txns"
-                            }
-                        }
-                    }
-                }
-            }
-
-            if !loading() && blocks().is_empty() {
+            if !loading() && blocks_empty {
                 p { class: "empty-state", "No blocks available" }
             }
 
