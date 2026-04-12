@@ -25,48 +25,34 @@ impl ApiClient {
         }
     }
 
-    /// Log request to console — metadata as JSON object, params as separate JSON log
+    /// Log request to console
     fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
         let url = format!("{}/v0/{}", self.base_url, endpoint);
-        let params_json = serde_json::to_value(params).unwrap_or_default();
-        // Metadata log
-        let meta_obj = serde_json::json!({
-            "type": "REQUEST",
-            "network": self.network,
-            "endpoint": endpoint,
-            "url": url,
-        });
-        if let Ok(js_val) = serde_wasm_bindgen::to_value(&meta_obj) {
-            web_sys::console::log_1(&js_val);
-        }
-        // Params log — the actual JSON body as its own log entry
-        if let Ok(js_val) = serde_wasm_bindgen::to_value(&params_json) {
-            web_sys::console::log_1(&js_val);
-        }
+        let params_json = serde_json::to_string(params).unwrap_or_default();
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
+        web_sys::console::log_1(&format!("params: {}", params_json).into());
+        web_sys::console::log_1(&"============".into());
     }
 
-    /// Log response to console — metadata as JSON object, body as separate JSON log
+    /// Log response to console
     fn log_response(&self, endpoint: &str, status: u16, body: &str) {
-        // Metadata log
-        let meta_obj = serde_json::json!({
-            "type": "RESPONSE",
-            "network": self.network,
-            "endpoint": endpoint,
-            "url": format!("{}/v0/{}", self.base_url, endpoint),
-            "status": status,
-        });
-        if let Ok(js_val) = serde_wasm_bindgen::to_value(&meta_obj) {
-            web_sys::console::log_1(&js_val);
-        }
-        // Body log — parse as JSON so devtools shows collapsible tree
-        if let Ok(body_val) = serde_json::from_str::<serde_json::Value>(body) {
-            if let Ok(js_val) = serde_wasm_bindgen::to_value(&body_val) {
-                web_sys::console::log_1(&js_val);
-            }
-        } else {
-            // Not JSON, log as string
-            web_sys::console::log_1(&body.into());
-        }
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
+        web_sys::console::log_1(&format!("status: {}", status).into());
+        // Log first 500 chars of body
+        let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
+        web_sys::console::log_1(&format!("body: {}", preview).into());
+        web_sys::console::log_1(&"============".into());
+    }
+
+    /// Log error to console
+    fn log_error(&self, endpoint: &str, error: &str, body_preview: &str) {
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] ERROR: {}/v0/{}", self.network, self.base_url, endpoint).into());
+        web_sys::console::log_1(&format!("error: {}", error).into());
+        web_sys::console::log_1(&format!("body: {}", body_preview).into());
+        web_sys::console::log_1(&"============".into());
     }
 
     /// Fetch from API endpoint
@@ -90,16 +76,7 @@ impl ApiClient {
         let parsed: T = match serde_json::from_str(&body_text) {
             Ok(v) => v,
             Err(e) => {
-                let err_obj = serde_json::json!({
-                    "type": "ERROR",
-                    "network": self.network,
-                    "endpoint": endpoint,
-                    "error": e.to_string(),
-                    "body_preview": &body_text[..body_text.len().min(200)],
-                });
-                if let Ok(js_val) = serde_wasm_bindgen::to_value(&err_obj) {
-                    web_sys::console::log_1(&js_val);
-                }
+                self.log_error(endpoint, &e.to_string(), &body_text[..body_text.len().min(200)]);
                 return Err(e.to_string());
             }
         };
