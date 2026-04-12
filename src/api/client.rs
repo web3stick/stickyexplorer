@@ -25,16 +25,6 @@ impl ApiClient {
         }
     }
 
-    /// Create client for mainnet
-    pub fn mainnet() -> Self {
-        Self::new("https://api.fastnear.com", "mainnet")
-    }
-
-    /// Create client for testnet
-    pub fn testnet() -> Self {
-        Self::new("https://api-testnet.fastnear.com", "testnet")
-    }
-
     /// Log request to console
     fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
         let url = format!("{}/v0/{}", self.base_url, endpoint);
