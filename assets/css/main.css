@@ -135,21 +135,6 @@ a:hover {
 }
 
 /* =========================================
-   Buttons
-   ========================================= */
-button {
-    cursor: pointer;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* =========================================
    Tables
    ========================================= */
 table {
@@ -197,16 +182,6 @@ body.dark #header a.logo,
 body.dark #header > div,
 .dark #header > div {
     border-bottom-color: #333;
-}
-
-body.dark button,
-.dark button {
-    border-color: #333;
-}
-
-body.dark button:hover:not(:disabled),
-.dark button:hover:not(:disabled) {
-    background-color: #2a2a4a;
 }
 
 body.dark .dark-mode-toggle:hover,

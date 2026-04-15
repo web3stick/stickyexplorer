@@ -8,6 +8,7 @@ const SEARCH_CSS: Asset = asset!("/assets/css/components_search.css");
 const HOME_CSS: Asset = asset!("/assets/css/page_home.css");
 const DETAIL_CSS: Asset = asset!("/assets/css/page_detail.css");
 const FOOTER_CSS: Asset = asset!("/assets/css/footer.css");
+const BUTTON_CSS: Asset = asset!("/assets/css/button.css");
 // =========================================
 fn main() {
     dioxus::launch(App);
@@ -56,6 +57,7 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: HOME_CSS }
         document::Link { rel: "stylesheet", href: DETAIL_CSS }
         document::Link { rel: "stylesheet", href: FOOTER_CSS }
+        document::Link { rel: "stylesheet", href: BUTTON_CSS }
         Router::<Route> {}
     }
 }
