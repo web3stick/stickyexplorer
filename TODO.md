@@ -1,5 +1,7 @@
 # TO DO
 
+⚠️ this codebase does not conform to my coding standards, wip
+
 - [ ] more details like near social data, and different cards on account page in addition to the Transactions.
 - [ ] inifinit scroll?? not really needed
 - [ ] transaction support for certain contracts, or maybe all?
