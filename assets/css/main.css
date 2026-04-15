@@ -170,22 +170,8 @@ th, td {
 .inline { display: inline; }
 .inline-flex { display: inline-flex; }
 
-/* =========================================
-   Dark mode toggle button
-   ========================================= */
-.dark-mode-toggle {
-    background: transparent;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 1.2rem;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
 
-.dark-mode-toggle:hover {
-    background: #f3f4f6;
-}
+
 
 /* =========================================
    Dark mode styles
