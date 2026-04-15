@@ -4,6 +4,8 @@
 // =========================================
 use crate::components::button_network::button_network;
 use crate::components::search_bar::search_bar;
+use crate::icons::lucide::{Moon, Sun};
+use crate::icons::Icon;
 use crate::logic::network::NetworkId;
 use crate::pages::page_account_detail::AccountDetail;
 use crate::pages::page_block_detail::BlockDetail;
@@ -149,13 +151,36 @@ pub fn Navbar() -> Element {
                     button {
                         class: "dark-mode-toggle",
                         onclick: toggle_dark_mode,
-                        if dark_mode() { "☀️" } else { "🌙" }
+                        Icon {
+                            data: if dark_mode() { Sun } else { Moon },
+                            size: "20".to_string(),
+                        }
                     }
                     search_bar {}
                 }
             }
         }
         main { class: "max-w-7xl mx-auto py-6", Outlet::<Route> {} }
+        footer {
+            class: "footer",
+            div {
+                class: "footer-content",
+                "© 2026 "
+                a {
+                    href: "https://sleet.near",
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    "sleet.near"
+                }
+                " — "
+                a {
+                    href: "https://github.com/web3stick/stickyexplorer",
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    "GitHub"
+                }
+            }
+        }
     }
 }
 #[component]
