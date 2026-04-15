@@ -142,12 +142,10 @@ pub fn Navbar() -> Element {
 
     rsx! {
         header { id: "header",
-            div {
+            div { class: "navbar-inner",
                 div { class: "navbar-left",
                     Link { to: Route::MainnetHome {}, class: "logo", "STICKYEXPLORER" }
                     button_network {}
-                }
-                div { class: "navbar-right",
                     button {
                         class: "dark-mode-toggle",
                         onclick: toggle_dark_mode,
@@ -156,6 +154,8 @@ pub fn Navbar() -> Element {
                             size: "20".to_string(),
                         }
                     }
+                }
+                div { class: "navbar-center",
                     search_bar {}
                 }
             }
