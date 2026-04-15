@@ -1,0 +1,47 @@
+/* General button styling */
+button {
+  background-color: #8ca2f5;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  /*width: 500px;*/
+  /*max-width: 90vw;*/
+}
+
+button:hover {
+  background-color: #c9a8f4;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   Dark mode
+   ========================================= */
+body.dark button,
+.dark button {
+  background-color: #8ca2f5;
+  color: #ffffff;
+}
+
+body.dark button:hover:not(:disabled),
+.dark button:hover:not(:disabled) {
+  background-color: #c9a8f4;
+}
+
+/* Dark mode toggle button — align SVG with text height */
+.dark-mode-toggle {
+  line-height: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-mode-toggle svg {
+  height: auto;
+}

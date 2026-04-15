@@ -20,4 +20,5 @@ pub mod logic {
     pub mod tx_cache;
 }
 pub mod utils;
+pub mod icons;
 // =========================================

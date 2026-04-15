@@ -5,7 +5,7 @@
 use crate::api::client::ApiClient;
 use crate::api::types::BlockHeader;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago};
-use crate::logic::network::{get_stored_network_id, NetworkId};
+use crate::logic::network::get_stored_network_id;
 use dioxus::prelude::*;
 // =========================================
 
@@ -19,7 +19,7 @@ pub fn Home() -> Element {
     let mut resume_token = use_signal(|| Option::<u64>::None);
     let mut has_more = use_signal(|| true);
     let mut loading_more = use_signal(|| false);
-    let mut network_id = use_signal(|| get_stored_network_id());
+    let network_id = use_signal(|| get_stored_network_id());
 
     // Initial load
     use_effect(move || {
@@ -188,9 +188,9 @@ pub fn Home() -> Element {
                         disabled: loading_more(),
                         class: "load-more-button",
                         if loading_more() {
-                            "Loading..."
+                            "LOADING..."
                         } else {
-                            "Load More"
+                            "LOAD MORE"
                         }
                     }
                 }

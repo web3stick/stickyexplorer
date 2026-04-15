@@ -20,6 +20,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
+    font-size: 20px;
 }
 
 /* Surface/background for cards and tables */
@@ -135,21 +136,6 @@ a:hover {
 }
 
 /* =========================================
-   Buttons
-   ========================================= */
-button {
-    cursor: pointer;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* =========================================
    Tables
    ========================================= */
 table {
@@ -170,22 +156,8 @@ th, td {
 .inline { display: inline; }
 .inline-flex { display: inline-flex; }
 
-/* =========================================
-   Dark mode toggle button
-   ========================================= */
-.dark-mode-toggle {
-    background: transparent;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 1.2rem;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
 
-.dark-mode-toggle:hover {
-    background: #f3f4f6;
-}
+
 
 /* =========================================
    Dark mode styles
@@ -211,16 +183,6 @@ body.dark #header a.logo,
 body.dark #header > div,
 .dark #header > div {
     border-bottom-color: #333;
-}
-
-body.dark button,
-.dark button {
-    border-color: #333;
-}
-
-body.dark button:hover:not(:disabled),
-.dark button:hover:not(:disabled) {
-    background-color: #2a2a4a;
 }
 
 body.dark .dark-mode-toggle:hover,

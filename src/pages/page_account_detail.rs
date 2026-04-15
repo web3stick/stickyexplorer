@@ -296,9 +296,9 @@ pub fn AccountDetail(account_id: String, network: NetworkId) -> Element {
                         disabled: loading_more_val,
                         class: "load-more-button",
                         if loading_more_val {
-                            "Loading..."
+                            "LOADING..."
                         } else {
-                            "Load More"
+                            "LOAD MORE"
                         }
                     }
                 }

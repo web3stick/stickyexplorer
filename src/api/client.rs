@@ -46,6 +46,15 @@ impl ApiClient {
         web_sys::console::log_1(&"============".into());
     }
 
+    /// Log error to console
+    fn log_error(&self, endpoint: &str, error: &str, body_preview: &str) {
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] ERROR: {}/v0/{}", self.network, self.base_url, endpoint).into());
+        web_sys::console::log_1(&format!("error: {}", error).into());
+        web_sys::console::log_1(&format!("body: {}", body_preview).into());
+        web_sys::console::log_1(&"============".into());
+    }
+
     /// Fetch from API endpoint
     async fn fetch_api<T: serde::de::DeserializeOwned>(
         &self,
@@ -67,7 +76,7 @@ impl ApiClient {
         let parsed: T = match serde_json::from_str(&body_text) {
             Ok(v) => v,
             Err(e) => {
-                web_sys::console::log_1(&format!("JSON parse error: {}", e).into());
+                self.log_error(endpoint, &e.to_string(), &body_text[..body_text.len().min(200)]);
                 return Err(e.to_string());
             }
         };
