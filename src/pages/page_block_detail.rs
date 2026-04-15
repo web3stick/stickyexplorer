@@ -293,7 +293,7 @@ pub fn BlockDetail(block_id: String, network: NetworkId) -> Element {
                     // Load more button
                     if has_more_val {
                         div { class: "load-more-container",
-                            button { onclick: load_more, class: "load-more-button", "Show More" }
+                            button { onclick: load_more, class: "load-more-button", "SHOW MORE" }
                         }
                     }
                 }

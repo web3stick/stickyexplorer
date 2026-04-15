@@ -167,17 +167,17 @@ pub fn Navbar() -> Element {
                 class: "footer-content",
                 "© 2026 "
                 a {
-                    href: "https://sleet.near",
+                    href: "https://sleet.near.page",
                     target: "_blank",
                     rel: "noopener noreferrer",
-                    "sleet.near"
+                    "SLEET.NEAR"
                 }
                 " — "
                 a {
                     href: "https://github.com/web3stick/stickyexplorer",
                     target: "_blank",
                     rel: "noopener noreferrer",
-                    "GitHub"
+                    "GITHUB"
                 }
             }
         }

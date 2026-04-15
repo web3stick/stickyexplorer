@@ -188,9 +188,9 @@ pub fn Home() -> Element {
                         disabled: loading_more(),
                         class: "load-more-button",
                         if loading_more() {
-                            "Loading..."
+                            "LOADING..."
                         } else {
-                            "Load More"
+                            "LOAD MORE"
                         }
                     }
                 }
