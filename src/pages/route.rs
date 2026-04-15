@@ -145,6 +145,11 @@ pub fn Navbar() -> Element {
             div { class: "navbar-inner",
                 div { class: "navbar-left",
                     Link { to: Route::MainnetHome {}, class: "logo", "STICKYEXPLORER" }
+                }
+                div { class: "navbar-center",
+                    search_bar {}
+                }
+                div { class: "navbar-right",
                     button_network {}
                     button {
                         class: "dark-mode-toggle",
@@ -154,9 +159,6 @@ pub fn Navbar() -> Element {
                             size: "20".to_string(),
                         }
                     }
-                }
-                div { class: "navbar-center",
-                    search_bar {}
                 }
             }
         }

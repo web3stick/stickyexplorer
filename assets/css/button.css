@@ -33,3 +33,15 @@ body.dark button:hover:not(:disabled),
 .dark button:hover:not(:disabled) {
   background-color: #c9a8f4;
 }
+
+/* Dark mode toggle button — align SVG with text height */
+.dark-mode-toggle {
+  line-height: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-mode-toggle svg {
+  height: auto;
+}

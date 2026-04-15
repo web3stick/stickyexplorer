@@ -24,22 +24,10 @@
     }
 }
 
-/* Left side: Logo + Network + Theme toggle */
+/* Left: Logo */
 .navbar-left {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-
-@media (min-width: 768px) {
-    .navbar-left {
-        flex-direction: row;
-        align-items: center;
-        width: auto;
-        gap: 24px;
-    }
 }
 
 /* Center: Search */
@@ -54,6 +42,13 @@
         display: flex;
         justify-content: center;
     }
+}
+
+/* Right: Network + Theme toggles */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 #header a.logo {
@@ -80,11 +75,6 @@ body.dark #header > .navbar-inner,
 body.dark #header a.logo,
 .dark #header a.logo {
     color: #8CA2F5;
-}
-
-body.dark .navbar-left,
-.dark .navbar-left {
-    color: #e0e0e0;
 }
 
 body.dark .dark-mode-toggle:hover,
