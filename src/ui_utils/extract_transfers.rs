@@ -3,7 +3,7 @@
 // Extract transfers and NFTs from transaction receipts
 // =========================================
 use crate::api::types::{TransactionAction, TransactionDetail};
-use crate::utils::parse_action::{get_delete_account_beneficiary, get_transfer_deposit};
+use crate::ui_utils::parse_action::{get_delete_account_beneficiary, get_transfer_deposit};
 // =========================================
 
 /// Transfer information (FT, MT, or NEAR)

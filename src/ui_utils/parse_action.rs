@@ -3,7 +3,7 @@
 // Parse transaction actions into structured form
 // =========================================
 use crate::api::types::TransactionAction;
-use crate::utils::format::encode_base58;
+use crate::ui_utils::format::encode_base58;
 use serde::{Deserialize, Serialize};
 // =========================================
 

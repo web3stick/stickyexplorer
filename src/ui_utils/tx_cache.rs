@@ -2,7 +2,7 @@
 // =========================================
 // Transaction cache for faster navigation
 // =========================================
-use crate::utils::parse_transaction::ParsedTx;
+use crate::ui_utils::parse_transaction::ParsedTx;
 use std::collections::HashMap;
 // =========================================
 

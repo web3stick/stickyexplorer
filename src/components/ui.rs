@@ -2,8 +2,8 @@
 // =========================================
 // Shared UI components for NEAR Explorer
 // =========================================
-use crate::logic::network::NetworkId;
-use crate::utils::format::{
+use crate::ui_utils::network::NetworkId;
+use crate::ui_utils::format::{
     format_gas_amount, format_near_amount, format_time_ago, truncate_middle,
 };
 use dioxus::prelude::*;

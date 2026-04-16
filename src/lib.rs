@@ -2,7 +2,6 @@
 // =========================================
 pub mod api;
 pub mod pages {
-    pub mod fetch_transactions;
     pub mod page_account_detail;
     pub mod page_block_detail;
     pub mod page_home;
@@ -15,10 +14,6 @@ pub mod components {
     pub mod ui;
     pub mod widgets;
 }
-pub mod logic {
-    pub mod network;
-    pub mod tx_cache;
-}
-pub mod utils;
+pub mod ui_utils;
 pub mod icons;
 // =========================================

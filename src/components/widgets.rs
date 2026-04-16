@@ -4,8 +4,8 @@
 // =========================================
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, near_amount};
-use crate::utils::highlight_json::highlight_json;
-use crate::utils::parse_transaction::parse_transaction;
+use crate::ui_utils::highlight_json::highlight_json;
+use crate::ui_utils::parse_transaction::parse_transaction;
 use dioxus::prelude::*;
 // =========================================
 
@@ -34,7 +34,7 @@ pub fn match_ft_transfer(tx: &TransactionDetail) -> bool {
         && parsed.transfers.iter().any(|t| {
             matches!(
                 t.token_type,
-                crate::utils::parse_transaction::TokenType::Nep141
+                crate::ui_utils::parse_transaction::TokenType::Nep141
             )
         })
 }
@@ -48,7 +48,7 @@ pub fn render_ft_transfer(tx: &TransactionDetail) -> Element {
         .filter(|t| {
             matches!(
                 t.token_type,
-                crate::utils::parse_transaction::TokenType::Nep141
+                crate::ui_utils::parse_transaction::TokenType::Nep141
             )
         })
         .collect();

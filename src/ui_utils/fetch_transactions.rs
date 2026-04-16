@@ -1,10 +1,10 @@
-// pages/fetch_transactions.rs
+// ui_utils/fetch_transactions.rs
 // =========================================
 // Shared transaction fetching with caching
 // =========================================
 use crate::api::client::ApiClient;
-use crate::logic::tx_cache::TxCache;
-use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
+use crate::ui_utils::tx_cache::TxCache;
+use crate::ui_utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
 // =========================================
 
