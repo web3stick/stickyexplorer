@@ -5,7 +5,7 @@
 use crate::api::client::ApiClient;
 use crate::api::types::BlockHeader;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago};
-use crate::ui_utils::network::get_stored_network_id;
+use crate::utils::network::get_stored_network_id;
 use dioxus::prelude::*;
 // =========================================
 

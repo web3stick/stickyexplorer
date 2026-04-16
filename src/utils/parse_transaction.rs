@@ -3,10 +3,10 @@
 // Entry point for transaction parsing
 // =========================================
 use crate::api::types::TransactionDetail;
-use crate::ui_utils::extract_transfers::{extract_nft_transfers, extract_transfers, resolve_success};
-use crate::ui_utils::parse_action::parse_action;
-pub use crate::ui_utils::extract_transfers::{NftTransferInfo, TokenType, TransferInfo};
-pub use crate::ui_utils::parse_action::ParsedAction;
+use crate::utils::extract_transfers::{extract_nft_transfers, extract_transfers, resolve_success};
+use crate::utils::parse_action::parse_action;
+pub use crate::utils::extract_transfers::{NftTransferInfo, TokenType, TransferInfo};
+pub use crate::utils::parse_action::ParsedAction;
 use serde::{Deserialize, Serialize};
 // =========================================
 

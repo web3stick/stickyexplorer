@@ -2,7 +2,7 @@
 // =========================================
 // Search bar component with network auto-switching
 // =========================================
-use crate::ui_utils::format::decode_base58;
+use crate::utils::format::decode_base58;
 use dioxus::prelude::*;
 // =========================================
 

@@ -7,7 +7,7 @@ use crate::api::types::{BlockDetailResponse, BlockTx};
 use crate::components::ui::{
     account_id, block_hash, block_height, gas_amount, near_amount, time_ago, transaction_hash,
 };
-use crate::ui_utils::network::NetworkId;
+use crate::utils::network::NetworkId;
 use dioxus::prelude::*;
 // =========================================
 

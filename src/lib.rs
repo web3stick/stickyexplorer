@@ -14,6 +14,6 @@ pub mod components {
     pub mod ui;
     pub mod widgets;
 }
-pub mod ui_utils;
+pub mod utils;
 pub mod icons;
 // =========================================

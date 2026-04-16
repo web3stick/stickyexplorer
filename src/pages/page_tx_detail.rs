@@ -6,8 +6,8 @@ use crate::api::client::ApiClient;
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago, transaction_hash};
 use crate::components::widgets::{get_matching_widgets, DefaultWidget, WidgetType};
-use crate::ui_utils::network::NetworkId;
-use crate::ui_utils::parse_transaction::{parse_transaction, ParsedTx};
+use crate::utils::network::NetworkId;
+use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
 // =========================================
 
@@ -188,9 +188,9 @@ pub fn TxDetail(tx_hash: String, network: NetworkId) -> Element {
                                 span { class: "font-mono", "{transfer.amount}" }
                                 span { class: "text-gray-500",
                                     match transfer.token_type {
-                                        crate::ui_utils::parse_transaction::TokenType::Near => " NEAR",
-                                        crate::ui_utils::parse_transaction::TokenType::Nep141 => " (FT)",
-                                        crate::ui_utils::parse_transaction::TokenType::Nep245 => " (MT)",
+                                        crate::utils::parse_transaction::TokenType::Near => " NEAR",
+                                        crate::utils::parse_transaction::TokenType::Nep141 => " (FT)",
+                                        crate::utils::parse_transaction::TokenType::Nep245 => " (MT)",
                                     }
                                 }
                             }

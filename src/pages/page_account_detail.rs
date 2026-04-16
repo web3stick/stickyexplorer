@@ -5,10 +5,10 @@
 use crate::api::client::ApiClient;
 use crate::api::types::AccountFilters;
 use crate::components::ui::{account_id as account_id_component, time_ago, transaction_hash};
-use crate::ui_utils::network::NetworkId;
-use crate::ui_utils::tx_cache::TxCache;
-use crate::ui_utils::fetch_transactions::fetch_and_parse_transactions;
-use crate::ui_utils::parse_transaction::ParsedTx;
+use crate::utils::network::NetworkId;
+use crate::utils::tx_cache::TxCache;
+use crate::utils::fetch_transactions::fetch_and_parse_transactions;
+use crate::utils::parse_transaction::ParsedTx;
 use dioxus::prelude::*;
 // =========================================
 
