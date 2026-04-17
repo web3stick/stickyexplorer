@@ -46,6 +46,11 @@ impl NetworkId {
             NetworkId::Testnet => NetworkId::Mainnet,
         }
     }
+
+    /// Get the other network
+    pub fn other(self) -> Self {
+        self.toggle()
+    }
 }
 
 impl std::fmt::Display for NetworkId {
