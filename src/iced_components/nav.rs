@@ -3,6 +3,7 @@
 // Navigation bar for Iced
 // =========================================
 use crate::iced_pages::Message;
+use crate::iced_pages::Page;
 use crate::iced_components::SearchBar;
 use crate::iced_components::search_bar::SearchBarState;
 use crate::iced_components::button::network_toggle;
@@ -10,7 +11,7 @@ use crate::iced_components::button::NetworkButtonState;
 use crate::utils_iced::network::NetworkId;
 use iced::{Color, Element, Length};
 use iced::alignment::Vertical;
-use iced_widget::{row, text::Text, Container, Space};
+use iced_widget::{button, row, text::Text, Container, Space};
 
 // =========================================
 
@@ -41,28 +42,25 @@ impl Navbar {
     pub fn view<'a>(
         state: &'a mut NavbarState,
         current_network: NetworkId,
+        active_page: Page,
         search_value: String,
         on_search_change: fn(String) -> Message,
         on_search_submit: fn() -> Message,
         on_network_select: fn(NetworkId) -> Message,
-        active_page: &'a str,
     ) -> Container<'a, Message> {
         let search_bar_state = &mut state.search;
         let network_buttons = &mut state.network_buttons;
 
+        // Logo as clickable link to home
+        let logo = button(
+            Text::new("STICKYEXPLORER")
+                .size(20)
+                .color(Color::from_rgb(0.9, 0.9, 0.9)),
+        )
+        .on_press(Message::NavigateTo(Page::Home));
         Container::new(
             row![
-                // Logo
-                Text::new("STICKYEXPLORER")
-                    .size(20)
-                    .color(Color::from_rgb(0.9, 0.9, 0.9)),
-                Space::new().width(Length::Fixed(20.0)),
-                // Nav links
-                nav_link("Home", "/", active_page),
-                Space::new().width(Length::Fixed(8.0)),
-                nav_link("Blocks", "/blocks", active_page),
-                Space::new().width(Length::Fixed(8.0)),
-                nav_link("Transactions", "/txs", active_page),
+                logo,
                 Space::new().width(Length::Fixed(20.0)),
                 // Search bar
                 SearchBar::view(
@@ -84,25 +82,4 @@ impl Navbar {
         )
         .padding(15)
     }
-}
-
-fn nav_link<'a>(label: &'static str, _route: &'static str, active: &'a str) -> Element<'a, Message> {
-    let is_active = match (label, active) {
-        ("Home", "home") => true,
-        ("Blocks", "blocks") => true,
-        ("Transactions", "txs") => true,
-        _ => false,
-    };
-
-    let text = Text::new(label)
-        .size(14)
-        .color(if is_active {
-            Color::from_rgb(0.3, 0.7, 1.0)
-        } else {
-            Color::from_rgb(0.7, 0.7, 0.7)
-        });
-
-    Container::new(text)
-        .padding(iced::Padding::from([0.0, 8.0]))
-        .into()
 }

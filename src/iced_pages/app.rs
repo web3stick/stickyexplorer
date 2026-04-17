@@ -123,9 +123,11 @@ impl AppState {
     /// Create new app state and a startup Task that loads blocks.
     /// This signature matches what iced::application() expects for its boot function.
     pub fn new() -> (Self, Task<Message>) {
+        println!("[DEBUG] AppState::new() called - creating initial state");
+        let network = NetworkId::Mainnet;
         let state = Self {
             current_page: Page::Home,
-            network: NetworkId::Mainnet,
+            network,
             search_query: String::new(),
             blocks: Vec::new(),
             blocks_loading: true,
@@ -152,15 +154,24 @@ impl AppState {
         };
         // Startup task: load blocks from the API
         let startup_task = Task::future(async move {
+            println!("[DEBUG] Startup task executing - about to call API");
             let api = crate::api::client::ApiClient::new(
-                state.network.api_base_url(),
-                state.network.as_str(),
+                network.api_base_url(),
+                network.as_str(),
             );
+            println!("[DEBUG] Startup task - ApiClient created, calling get_blocks...");
             match api.get_blocks(Some(80), Some(true), None, None).await {
-                Ok(data) => Message::BlocksLoaded(data.blocks),
-                Err(e) => Message::LoadBlocksFailed(e),
+                Ok(data) => {
+                    println!("[DEBUG] Startup task - get_blocks succeeded, {} blocks", data.blocks.len());
+                    Message::BlocksLoaded(data.blocks)
+                }
+                Err(e) => {
+                    println!("[DEBUG] Startup task - get_blocks failed: {}", e);
+                    Message::LoadBlocksFailed(e)
+                }
             }
         });
+        println!("[DEBUG] AppState::new() returning state and startup task");
         (state, startup_task)
     }
 

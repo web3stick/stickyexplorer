@@ -376,8 +376,6 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
     let network = state.network;
     let current_page = state.current_page.clone();
     let is_home = matches!(current_page, Page::Home);
-    let _is_block = matches!(current_page, Page::Block(_));
-    let _is_tx = matches!(current_page, Page::Tx(_));
     
     // Clone the search value BEFORE we start building widgets
     let search_value = state.search_query.clone();
@@ -424,16 +422,14 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
     // Build navbar - search_value is already owned, safe to use
     let navbar = container(
         row![
-            // Logo
-            container(
+            // Logo - clickable link to home
+            button(
                 Text::new("STICKYEXPLORER")
                     .size(18)
                     .color(Color::from_rgb(0.9, 0.9, 0.9)),
             )
-            .padding(iced::Padding::from([0.0, 12.0])),
-
-            // Home link only
-            nav_link("Home", is_home),
+            .padding(iced::Padding::from([0.0, 12.0]))
+            .on_press(Message::NavigateTo(Page::Home)),
 
             Space::new().width(Length::Fixed(20.0)),
 
@@ -467,20 +463,5 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
     )
     .width(Length::Fill)
     .height(Length::Fill)
-    .into()
-}
-
-fn nav_link(label: &'static str, is_active: bool) -> Element<'static, Message> {
-    button(
-        Text::new(label)
-            .size(13)
-            .color(if is_active {
-                Color::from_rgb(0.3, 0.7, 1.0)
-            } else {
-                Color::from_rgb(0.6, 0.6, 0.6)
-            }),
-    )
-    .padding(iced::Padding::from([4.0, 10.0]))
-    .on_press(Message::NavigateTo(Page::Home))
     .into()
 }

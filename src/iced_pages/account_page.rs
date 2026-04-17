@@ -92,12 +92,15 @@ impl AccountPage {
             // Build all rows first, then add them
             let mut rows = Vec::new();
             for atx in txs {
-                if let Some(p) = parsed.get(&atx.transaction_hash) {
-                    let is_success = p.is_success;
-                    let onclick = Message::NavigateTo(Page::Tx(atx.transaction_hash.clone()));
+                let hash = &atx.transaction_hash;
+                let onclick = Message::NavigateTo(Page::Tx(hash.clone()));
 
-                    let tx_hash = truncate_middle(&atx.transaction_hash, 12);
-                    let time_str = format_time_ago(&atx.tx_block_timestamp);
+                let tx_hash = truncate_middle(hash, 12);
+                let time_str = format_time_ago(&atx.tx_block_timestamp);
+
+                // Use parsed data if available, otherwise fall back to raw data
+                if let Some(p) = parsed.get(hash) {
+                    let is_success = p.is_success;
                     let signer = truncate_middle(&p.signer_id, 16);
                     let receiver = truncate_middle(&p.receiver_id, 16);
                     let action_str = p.actions.first().map(|a| {
@@ -107,7 +110,6 @@ impl AccountPage {
                         }
                         s
                     }).unwrap_or_else(|| "Unknown".to_string());
-
                     let status_text = match is_success {
                         Some(true) => "✓",
                         Some(false) => "✗",
@@ -137,7 +139,29 @@ impl AccountPage {
                     )
                     .width(Length::Fill)
                     .on_press(onclick);
-
+                    rows.push(container(row).padding(iced::Padding::from([8.0, 12.0])));
+                } else {
+                    // Fallback row when parsing failed — show raw data
+                    let status_icon = if atx.is_success { "✓" } else { "✗" };
+                    let status_color = if atx.is_success { Color::from_rgb(0.2, 0.8, 0.2) } else { Color::from_rgb(0.8, 0.2, 0.2) };
+                    let row = button(
+                        Row::new()
+                            .push(Text::new(tx_hash).size(12).color(Color::from_rgb(0.7, 0.95, 0.7)))
+                            .push(Space::new().width(Length::Fixed(20.0)))
+                            .push(Text::new(time_str).size(13).color(Color::from_rgb(0.9, 0.9, 0.95)))
+                            .push(Space::new().width(Length::Fixed(20.0)))
+                            .push(Text::new("—").size(13).color(Color::from_rgb(0.5, 0.5, 0.5)))
+                            .push(Space::new().width(Length::Fixed(20.0)))
+                            .push(Text::new("—").size(13).color(Color::from_rgb(0.5, 0.5, 0.5)))
+                            .push(Space::new().width(Length::Fixed(20.0)))
+                            .push(Text::new("—").size(12).color(Color::from_rgb(0.5, 0.5, 0.5)))
+                            .push(Space::new().width(Length::Fixed(20.0)))
+                            .push(Text::new(status_icon).size(14).color(status_color))
+                            .spacing(8)
+                            .align_y(Vertical::Center),
+                    )
+                    .width(Length::Fill)
+                    .on_press(onclick);
                     rows.push(container(row).padding(iced::Padding::from([8.0, 12.0])));
                 }
             }
