@@ -34,7 +34,7 @@ impl SearchBar {
         _state: &SearchBarState,
         value: String,
         on_change: fn(String) -> Message,
-        on_submit: fn() -> Message,
+        _on_submit: fn() -> Message,
     ) -> Element<'static, Message> {
         let placeholder = "Search tx, block, or account...";
 
@@ -44,12 +44,12 @@ impl SearchBar {
                     .width(Length::Fixed(300.0))
                     .padding(iced::Padding::from([8.0, 16.0]))
                     .on_input(on_change)
-                    .on_submit(on_submit()),
+                    .on_submit(Message::SearchSubmit),
             )
             .push(
                 Button::new(Text::new("GO"))
                     .padding(iced::Padding::from([8.0, 16.0]))
-                    .on_press(on_submit()),
+                    .on_press(Message::SearchSubmit),
             )
             .spacing(4)
             .into()
