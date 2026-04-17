@@ -27,32 +27,40 @@ impl ApiClient {
 
     /// Log request to console
     fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
-        let url = format!("{}/v0/{}", self.base_url, endpoint);
-        let params_json = serde_json::to_string(params).unwrap_or_default();
-        web_sys::console::log_1(&"============".into());
-        web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
-        web_sys::console::log_1(&format!("params: {}", params_json).into());
-        web_sys::console::log_1(&"============".into());
+        #[cfg(feature = "logging")]
+        {
+            let url = format!("{}/v0/{}", self.base_url, endpoint);
+            let params_json = serde_json::to_string(params).unwrap_or_default();
+            web_sys::console::log_1(&"============".into());
+            web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
+            web_sys::console::log_1(&format!("params: {}", params_json).into());
+            web_sys::console::log_1(&"============".into());
+        }
     }
 
     /// Log response to console
     fn log_response(&self, endpoint: &str, status: u16, body: &str) {
-        web_sys::console::log_1(&"============".into());
-        web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
-        web_sys::console::log_1(&format!("status: {}", status).into());
-        // Log first 500 chars of body
-        let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
-        web_sys::console::log_1(&format!("body: {}", preview).into());
-        web_sys::console::log_1(&"============".into());
+        #[cfg(feature = "logging")]
+        {
+            web_sys::console::log_1(&"============".into());
+            web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
+            web_sys::console::log_1(&format!("status: {}", status).into());
+            let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
+            web_sys::console::log_1(&format!("body: {}", preview).into());
+            web_sys::console::log_1(&"============".into());
+        }
     }
 
     /// Log error to console
     fn log_error(&self, endpoint: &str, error: &str, body_preview: &str) {
-        web_sys::console::log_1(&"============".into());
-        web_sys::console::log_1(&format!("[{}] ERROR: {}/v0/{}", self.network, self.base_url, endpoint).into());
-        web_sys::console::log_1(&format!("error: {}", error).into());
-        web_sys::console::log_1(&format!("body: {}", body_preview).into());
-        web_sys::console::log_1(&"============".into());
+        #[cfg(feature = "logging")]
+        {
+            web_sys::console::log_1(&"============".into());
+            web_sys::console::log_1(&format!("[{}] ERROR: {}/v0/{}", self.network, self.base_url, endpoint).into());
+            web_sys::console::log_1(&format!("error: {}", error).into());
+            web_sys::console::log_1(&format!("body: {}", body_preview).into());
+            web_sys::console::log_1(&"============".into());
+        }
     }
 
     /// Fetch from API endpoint

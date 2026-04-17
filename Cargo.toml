@@ -26,8 +26,9 @@ url = "2"
 # ===========================================
 [features]
 default = ["web"]
-web = ["dioxus/web", "reqwest/default-tls"]
+web = ["dioxus/web", "reqwest/default-tls", "logging"]
 desktop = ["dioxus/desktop", "iced/wgpu", "reqwest/default-tls"]
 iced_desktop = ["iced/wgpu", "iced/x11"]
+logging = []
 mobile = ["dioxus/mobile", "reqwest/default-tls"]
 # ===========================================
