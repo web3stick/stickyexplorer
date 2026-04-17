@@ -7,7 +7,7 @@
 - [x] Content not centered/filling width — tables and info cards left-aligned with wasted space
 - [x] Table headers not aligned with data columns — header spacing doesn't match row spacing
 - [x] TX page doesn't fetch signer/receiver details — ParsedTx not created from TransactionDetail
-- [ ] **Content not filling full width**: `.max_width(1200.0)` made it worse — narrow and centered. Fix: remove `max_width`, focus on making inner rows/columns stretch to fill available space (use `Width::Fill` for spacers, or wrap inner content in `width(Length::Fill)` containers)
+- [ ] **Content not filling full width**: Web tx page uses `.detail-card` wrappers for each section. Iced has no such boxes — sections are just loose column items. Fix: wrap each section in `Container::new(content).width(Length::Fill)` to create full-width visual containers.
 - [ ] **JSON preview toggle on TX page**
 
 ## Lower Priority / Future
