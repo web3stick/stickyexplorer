@@ -39,7 +39,7 @@ required-features = ["iced_desktop"]
 default = ["web"]
 web = ["dioxus/web", "reqwest/default-tls", "logging"]
 desktop = ["dioxus/desktop", "iced/wgpu", "reqwest/default-tls"]
-iced_desktop = ["iced/wgpu", "iced/x11"]
+iced_desktop = ["iced/wgpu", "iced/x11", "reqwest/default-tls"]
 logging = []
 mobile = ["dioxus/mobile", "reqwest/default-tls"]
 # ===========================================
