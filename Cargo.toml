@@ -17,11 +17,22 @@ chrono = { version = "0.4", default-features = false, features = ["std", "now", 
 gloo-timers = { version = "0.3", features = ["futures"] }
 base64 = "0.22"
 
-# Iced desktop UI
+# Iced desktop UI (non-wasm only)
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 iced = { version = "0.14.0", default-features = false, features = ["lazy", "tokio", "wgpu", "x11"] }
 iced_widget = { version = "0.14.0" }
 tokio = { version = "1", features = ["full"] }
 url = "2"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# Stub deps for wasm32 — iced is desktop-only, but we need the crate to at least parse
+# for cargo metadata / IDE indexing. Real compilation uses --features web only.
+
+[[bin]]
+name = "stickyexplorer_iced_main"
+path = "src/bin/stickyexplorer_iced_main.rs"
+required-features = ["iced_desktop"]
+# Only built for iced_desktop (non-wasm) targets
 
 # ===========================================
 [features]

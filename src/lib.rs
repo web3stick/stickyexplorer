@@ -18,6 +18,9 @@ pub mod utils;
 pub mod utils_web;
 pub mod utils_iced;
 pub mod icons;
+// Iced desktop UI modules — desktop/non-wasm only
+#[cfg(not(target_arch = "wasm32"))]
 pub mod iced_pages;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod iced_components;
 // =========================================
