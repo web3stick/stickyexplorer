@@ -14,6 +14,13 @@
    - Note: previously `max_width(Length::Fixed(1200.0))` was tried — wrong type. Correct is `max_width(1200.0)` (f32 pixels).
 
 ## What's left to do
+- [ ] **Alignment still off — content not taking full width**: The `.max_width(1200.0)` fix made it worse — content is now narrow and centered instead of filling the window. The correct approach may be:
+  - Remove `max_width` — let content fill 100% width (Length::Fill)
+  - The navbar has fixed left/right padding (12px), content should match
+  - Key: the issue is likely that inner content columns have fixed-width rows that don't stretch — NOT the outer container
+  - Consider: the table rows use `Space::new().width(Length::Fixed(n))` which doesn't expand — may need to use `Width::Fill` for spacers or wrap rows in containers with `width(Length::Fill)`
+  - Alternatively: make the outer column `width(Length::Fill)` instead of relying on inner row widths
+  - Test at different window sizes to confirm behavior
 - [ ] **JSON preview toggle on TX page**: Add `ToggleJson` variant to `Message` enum, `show_json: bool` to `AppState`, toggle button in tx_page, collapse/expand raw JSON
 - [ ] Clean up unused import warnings across iced_pages/ and iced_components/
 - [ ] Add more transaction details to TX page (actions, transfers sections)
