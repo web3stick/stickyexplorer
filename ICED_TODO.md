@@ -7,6 +7,7 @@
 - [x] Content not centered/filling width — tables and info cards left-aligned with wasted space
 - [x] Table headers not aligned with data columns — header spacing doesn't match row spacing
 - [x] TX page doesn't fetch signer/receiver details — ParsedTx not created from TransactionDetail
+- [ ] JSON preview toggle on TX page — collapsible raw JSON section
 
 ## Lower Priority / Future
 
