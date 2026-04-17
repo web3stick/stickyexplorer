@@ -12,8 +12,7 @@
 // web/browser dependencies — pure desktop networking via reqwest + tokio.
 // =========================================
 
-use stickyexplorer::iced_pages::app::AppState;
-use stickyexplorer::iced_pages::{iced_app, Message};
+use stickyexplorer::iced_pages::app::{AppState, Message};
 use iced::{application, Element, Settings, Theme};
 
 fn main() -> iced::Result {
@@ -23,15 +22,16 @@ fn main() -> iced::Result {
 
     // Use a generic view function that works with any lifetime
     fn view<'a>(state: &'a AppState) -> Element<'a, Message> {
-        iced_app::view(state)
+        state.view()
     }
 
-    application(
-        AppState::new,
-        |state: &mut AppState, msg: Message| iced_app::update(msg, state),
-        view,
-    )
-    .theme(Theme::Dark)
-    .settings(settings)
-    .run()
+    // Use a mutable update closure
+    fn update(state: &mut AppState, msg: Message) -> iced::Task<Message> {
+        state.update(msg)
+    }
+
+    application(AppState::new, update, view)
+        .theme(Theme::Dark)
+        .settings(settings)
+        .run()
 }

@@ -10,10 +10,11 @@ use crate::iced_components::button::NetworkButtonState;
 use crate::utils_iced::network::NetworkId;
 use iced::{Color, Element, Length};
 use iced::alignment::Vertical;
-use iced_widget::{container, row, text::Text, Container, Row, Space};
+use iced_widget::{row, text::Text, Container, Space};
 
 // =========================================
 
+#[derive(Debug, Clone)]
 pub struct NavbarState {
     pub network_buttons: NetworkButtonState,
     pub search: SearchBarState,

@@ -3,10 +3,9 @@
 // Network toggle button for Iced
 // =========================================
 use crate::iced_pages::Message;
-use crate::iced_pages::app::Page;
 use crate::utils_iced::network::NetworkId;
 use iced::{Color, Element};
-use iced_widget::{Button, Row, Text};
+use iced_widget::{Button, Text};
 
 #[derive(Debug, Clone)]
 pub enum NetworkToggle {

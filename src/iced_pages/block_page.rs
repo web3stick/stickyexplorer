@@ -4,11 +4,11 @@
 // =========================================
 use crate::iced_pages::{Message, Page};
 use crate::iced_pages::app::{heading_text, label_text, mono_text, value_text};
-use crate::api::types::{BlockDetailResponse, BlockTx};
+use crate::api::types::BlockDetailResponse;
 use crate::utils::format::{format_gas_amount, format_time_ago, truncate_middle};
 use iced::{Color, Element, Length};
 use iced::alignment::Vertical;
-use iced_widget::{button, container, scrollable, Column, Container, Row, Space, Text};
+use iced_widget::{button, scrollable, Column, Container, Row, Space, Text};
 
 pub struct BlockPage;
 

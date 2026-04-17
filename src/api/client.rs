@@ -25,43 +25,46 @@ impl ApiClient {
         }
     }
 
-    /// Log request to console
+    /// Log request to console (no-op when logging feature is off)
+    #[cfg(feature = "logging")]
     fn log_request(&self, endpoint: &str, params: &impl serde::Serialize) {
-        #[cfg(feature = "logging")]
-        {
-            let url = format!("{}/v0/{}", self.base_url, endpoint);
-            let params_json = serde_json::to_string(params).unwrap_or_default();
-            web_sys::console::log_1(&"============".into());
-            web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
-            web_sys::console::log_1(&format!("params: {}", params_json).into());
-            web_sys::console::log_1(&"============".into());
-        }
+        let url = format!("{}/v0/{}", self.base_url, endpoint);
+        let params_json = serde_json::to_string(params).unwrap_or_default();
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] REQUEST: {}", self.network, url).into());
+        web_sys::console::log_1(&format!("params: {}", params_json).into());
+        web_sys::console::log_1(&"============".into());
     }
 
-    /// Log response to console
+    #[cfg(not(feature = "logging"))]
+    fn log_request(&self, _endpoint: &str, _params: &impl serde::Serialize) {}
+
+    /// Log response to console (no-op when logging feature is off)
+    #[cfg(feature = "logging")]
     fn log_response(&self, endpoint: &str, status: u16, body: &str) {
-        #[cfg(feature = "logging")]
-        {
-            web_sys::console::log_1(&"============".into());
-            web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
-            web_sys::console::log_1(&format!("status: {}", status).into());
-            let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
-            web_sys::console::log_1(&format!("body: {}", preview).into());
-            web_sys::console::log_1(&"============".into());
-        }
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] RESPONSE: {}/v0/{}", self.network, self.base_url, endpoint).into());
+        web_sys::console::log_1(&format!("status: {}", status).into());
+        let preview = if body.len() > 500 { format!("{}...(truncated)", &body[..500]) } else { body.to_string() };
+        web_sys::console::log_1(&format!("body: {}", preview).into());
+        web_sys::console::log_1(&"============".into());
     }
 
-    /// Log error to console
+    #[cfg(not(feature = "logging"))]
+    fn log_response(&self, _endpoint: &str, _status: u16, _body: &str) {}
+
+    /// Log error to console (no-op when logging feature is off)
+    #[cfg(feature = "logging")]
     fn log_error(&self, endpoint: &str, error: &str, body_preview: &str) {
-        #[cfg(feature = "logging")]
-        {
-            web_sys::console::log_1(&"============".into());
-            web_sys::console::log_1(&format!("[{}] ERROR: {}/v0/{}", self.network, self.base_url, endpoint).into());
-            web_sys::console::log_1(&format!("error: {}", error).into());
-            web_sys::console::log_1(&format!("body: {}", body_preview).into());
-            web_sys::console::log_1(&"============".into());
-        }
+        web_sys::console::log_1(&"============".into());
+        web_sys::console::log_1(&format!("[{}] ERROR: {}/v0/{}", self.network, self.base_url, endpoint).into());
+        web_sys::console::log_1(&format!("error: {}", error).into());
+        web_sys::console::log_1(&format!("body: {}", body_preview).into());
+        web_sys::console::log_1(&"============".into());
     }
+
+    #[cfg(not(feature = "logging"))]
+    fn log_error(&self, _endpoint: &str, _error: &str, _body_preview: &str) {}
 
     /// Fetch from API endpoint
     async fn fetch_api<T: serde::de::DeserializeOwned>(

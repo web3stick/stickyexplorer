@@ -169,9 +169,3 @@ impl AccountPage {
             .into()
     }
 }
-
-fn mono(s: &str) -> Text {
-    Text::new(s)
-        .size(12)
-        .color(Color::from_rgb(0.7, 0.95, 0.7))
-}

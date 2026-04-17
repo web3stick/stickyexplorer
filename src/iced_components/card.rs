@@ -3,7 +3,7 @@
 // Card component for Iced
 // =========================================
 use crate::iced_pages::Message;
-use iced::{Background, Color, Element, Length};
+use iced::{Color, Element, Length};
 use iced_widget::container::Container;
 
 // =========================================
@@ -24,7 +24,6 @@ impl Card {
 // =========================================
 // A simple labeled row for key-value display
 // =========================================
-use iced::{Alignment};
 use iced::alignment::Vertical;
 use iced_widget::{row, text::Text, Row, Space};
 

@@ -18,8 +18,6 @@ use iced::alignment::{Horizontal, Vertical};
 use iced_widget::{button, column, container, row, Text, Space};
 use std::collections::HashMap;
 
-const APP_TITLE: &str = "StickyExplorer";
-
 // =========================================
 
 /// Detect search query type and route accordingly
@@ -378,8 +376,8 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
     let network = state.network;
     let current_page = state.current_page.clone();
     let is_home = matches!(current_page, Page::Home);
-    let is_block = matches!(current_page, Page::Block(_));
-    let is_tx = matches!(current_page, Page::Tx(_));
+    let _is_block = matches!(current_page, Page::Block(_));
+    let _is_tx = matches!(current_page, Page::Tx(_));
     
     // Clone the search value BEFORE we start building widgets
     let search_value = state.search_query.clone();

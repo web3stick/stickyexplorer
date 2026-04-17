@@ -2,8 +2,7 @@
 // =========================================
 // Home page - Latest blocks list for Iced
 // =========================================
-use crate::iced_pages::{AppState, Message, Page};
-use crate::iced_pages::app::mono_text;
+use crate::iced_pages::{Message, Page};
 use crate::utils::format::{format_gas_amount, format_time_ago, truncate_middle};
 use iced::{Color, Element, Length};
 use iced::alignment::{Horizontal, Vertical};

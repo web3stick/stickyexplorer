@@ -7,9 +7,10 @@ use crate::api::types::{
 };
 use crate::iced_components::nav::NavbarState;
 use crate::iced_components::search_bar::SearchBarState;
-use crate::utils::format::{format_gas_amount, format_time_ago, truncate_middle};
+use crate::iced_pages::iced_app;
 use crate::utils_iced::network::NetworkId;
-use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
+use crate::utils::parse_transaction::ParsedTx;
+use iced::{Element, Task};
 use std::collections::HashMap;
 
 // =========================================
@@ -79,6 +80,7 @@ impl Page {
 }
 
 /// Application state
+#[derive(Clone)]
 pub struct AppState {
     pub current_page: Page,
     pub network: NetworkId,
@@ -118,8 +120,10 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new() -> Self {
-        Self {
+    /// Create new app state and a startup Task that loads blocks.
+    /// This signature matches what iced::application() expects for its boot function.
+    pub fn new() -> (Self, Task<Message>) {
+        let state = Self {
             current_page: Page::Home,
             network: NetworkId::Mainnet,
             search_query: String::new(),
@@ -145,13 +149,36 @@ impl AppState {
             tx_error: None,
             navbar: NavbarState::new(),
             search: SearchBarState::new(),
-        }
+        };
+        // Startup task: load blocks from the API
+        let startup_task = Task::future(async move {
+            let api = crate::api::client::ApiClient::new(
+                state.network.api_base_url(),
+                state.network.as_str(),
+            );
+            match api.get_blocks(Some(80), Some(true), None, None).await {
+                Ok(data) => Message::BlocksLoaded(data.blocks),
+                Err(e) => Message::LoadBlocksFailed(e),
+            }
+        });
+        (state, startup_task)
+    }
+
+    /// Mutable update — delegates to iced_app::update.
+    /// This is called by the binary's update closure.
+    pub fn update(&mut self, msg: Message) -> Task<Message> {
+        iced_app::update(msg, self)
+    }
+
+    /// View — delegates to iced_app::view.
+    pub fn view(&self) -> Element<'_, Message> {
+        iced_app::view(self)
     }
 }
 
 impl Default for AppState {
     fn default() -> Self {
-        Self::new()
+        Self::new().0
     }
 }
 

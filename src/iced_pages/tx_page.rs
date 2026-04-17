@@ -10,7 +10,7 @@ use crate::utils::format::{format_gas_amount, format_time_ago, format_near_amoun
 use crate::utils::extract_transfers::TokenType;
 use iced::{Color, Element, Length};
 use iced::alignment::Vertical;
-use iced_widget::{container, scrollable, Column, Container, Row, Space, Text};
+use iced_widget::{scrollable, Column, Container, Row, Space, Text};
 
 pub struct TxPage;
 
