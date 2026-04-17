@@ -7,8 +7,8 @@ use crate::iced_pages::app::{label_text, mono_text, value_text};
 use crate::api::types::BlockDetailResponse;
 use crate::utils::format::{format_gas_amount, format_time_ago, truncate_middle};
 use iced::{Color, Element, Length};
-use iced::alignment::Vertical;
-use iced_widget::{button, scrollable, Column, Container, Row, Space, Text};
+use iced::alignment::{Horizontal, Vertical};
+use iced_widget::{button, container, scrollable, Column, Container, Row, Space, Text};
 
 pub struct BlockPage;
 
@@ -289,11 +289,11 @@ impl BlockPage {
                     // Build row with individually clickable links
                     let row = Row::new()
                         .push(tx_link(hash_display.clone(), tx.transaction_hash.clone()))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(value_text(&time_str))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(account_link(signer_str.clone(), tx.signer_id.clone()))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(account_link(receiver_str.clone(), tx.receiver_id.clone()))
                         .push(Space::new().width(Length::Fixed(20.0)))
                         .push(mono_text(&gas_str))
@@ -312,10 +312,14 @@ impl BlockPage {
             col
         };
 
-        scrollable(inner)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .into()
+        container(
+            scrollable(inner)
+                .width(Length::Fill)
+                .height(Length::Fill),
+        )
+        .width(Length::Fill)
+        .align_x(Horizontal::Center)
+        .into()
     }
 }
 

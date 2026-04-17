@@ -7,8 +7,8 @@ use crate::api::types::AccountTx;
 use crate::utils::parse_transaction::ParsedTx;
 use crate::utils::format::{format_time_ago, truncate_middle};
 use std::collections::HashMap;
-use iced::{Color, Element, Length, Alignment};
-use iced::alignment::Vertical;
+use iced::{Alignment, Color, Element, Length};
+use iced::alignment::{Horizontal, Vertical};
 use iced_widget::{button, container, scrollable, Text, Column, Row, Space};
 
 pub struct AccountPage;
@@ -150,13 +150,13 @@ impl AccountPage {
                     // Build row with individually clickable links
                     let row = Row::new()
                         .push(tx_link(tx_hash.clone(), hash.clone()))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(Text::new(time_str).size(12).color(Color::from_rgb(0.9, 0.9, 0.95)))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(account_link(signer.clone(), p.signer_id.clone()))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(account_link(receiver.clone(), p.receiver_id.clone()))
-                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Space::new().width(Length::Fixed(40.0)))
                         .push(Text::new(action_str).size(12).color(Color::from_rgb(0.6, 0.6, 0.8)))
                         .push(Space::new().width(Length::Fixed(20.0)))
                         .push(Text::new(status_text).size(14).color(status_color))
@@ -213,9 +213,13 @@ impl AccountPage {
             col
         };
 
-        scrollable(inner)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .into()
+        container(
+            scrollable(inner)
+                .width(Length::Fill)
+                .height(Length::Fill),
+        )
+        .width(Length::Fill)
+        .align_x(Horizontal::Center)
+        .into()
     }
 }

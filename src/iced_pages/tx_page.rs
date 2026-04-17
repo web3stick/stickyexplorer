@@ -10,8 +10,8 @@ use crate::utils::parse_transaction::ParsedTx;
 use crate::utils::format::{format_gas_amount, format_time_ago, format_near_amount, truncate_middle};
 use crate::utils::extract_transfers::TokenType;
 use iced::{Color, Element, Length};
-use iced::alignment::Vertical;
-use iced_widget::{button, scrollable, Column, Container, Row, Space, Text};
+use iced::alignment::{Horizontal, Vertical};
+use iced_widget::{button, container, scrollable, Column, Container, Row, Space, Text};
 
 pub struct TxPage;
 
@@ -300,9 +300,13 @@ impl TxPage {
             col
         };
 
-        scrollable(inner)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .into()
+        container(
+            scrollable(inner)
+                .width(Length::Fill)
+                .height(Length::Fill),
+        )
+        .width(Length::Fill)
+        .align_x(Horizontal::Center)
+        .into()
     }
 }

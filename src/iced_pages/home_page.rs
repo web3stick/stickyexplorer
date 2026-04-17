@@ -129,27 +129,27 @@ impl HomePage {
 
                 let row = Row::new()
                     .push(block_height_link(height.clone(), block_id_str.clone()))
-                    .push(Space::new().width(Length::Fixed(20.0)))
+                    .push(Space::new().width(Length::Fixed(60.0)))
                     .push(
                         Text::new(time)
                             .size(13)
                             .color(Color::from_rgb(0.9, 0.9, 0.9)),
                     )
-                    .push(Space::new().width(Length::Fixed(20.0)))
+                    .push(Space::new().width(Length::Fixed(60.0)))
                     .push(author_link(author.clone(), block.author_id.clone()))
-                    .push(Space::new().width(Length::Fixed(20.0)))
+                    .push(Space::new().width(Length::Fixed(60.0)))
                     .push(
                         Text::new(num_transactions)
                             .size(13)
                             .color(Color::from_rgb(0.9, 0.9, 0.9)),
                     )
-                    .push(Space::new().width(Length::Fixed(20.0)))
+                    .push(Space::new().width(Length::Fixed(30.0)))
                     .push(
                         Text::new(num_receipts)
                             .size(13)
                             .color(Color::from_rgb(0.9, 0.9, 0.9)),
                     )
-                    .push(Space::new().width(Length::Fixed(20.0)))
+                    .push(Space::new().width(Length::Fixed(30.0)))
                     .push(
                         Text::new(gas_used)
                             .size(13)
@@ -186,9 +186,13 @@ impl HomePage {
             );
         }
 
-        scrollable(content_col)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .into()
+        container(
+            scrollable(content_col)
+                .width(Length::Fill)
+                .height(Length::Fill),
+        )
+        .width(Length::Fill)
+        .align_x(Horizontal::Center)
+        .into()
     }
 }
