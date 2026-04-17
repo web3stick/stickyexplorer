@@ -6,7 +6,7 @@ use crate::api::client::ApiClient;
 use crate::api::types::TransactionDetail;
 use crate::components::ui::{account_id, block_height, gas_amount, time_ago, transaction_hash};
 use crate::components::widgets::{get_matching_widgets, DefaultWidget, WidgetType};
-use crate::utils::network::NetworkId;
+use crate::utils_web::network::NetworkId;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use dioxus::prelude::*;
 // =========================================

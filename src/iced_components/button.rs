@@ -4,7 +4,7 @@
 // =========================================
 use crate::iced_pages::Message;
 use crate::iced_pages::app::Page;
-use crate::utils::network::NetworkId;
+use crate::utils_iced::network::NetworkId;
 use iced::{Color, Element};
 use iced_widget::{Button, Row, Text};
 

@@ -11,7 +11,7 @@ use crate::iced_pages::block_page::BlockPage;
 use crate::iced_pages::tx_page::TxPage;
 use crate::iced_components::button::network_toggle;
 use crate::iced_components::SearchBar;
-use crate::utils::network::NetworkId;
+use crate::utils_iced::network::NetworkId;
 use crate::utils::parse_transaction::parse_transaction;
 use iced::{Color, Element, Length, Task};
 use iced::alignment::{Horizontal, Vertical};

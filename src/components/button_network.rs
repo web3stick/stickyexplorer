@@ -2,7 +2,7 @@
 // =========================================
 // Network toggle button component
 // =========================================
-use crate::utils::network::{get_stored_network_id, save_network_id, toggle_network, NetworkId};
+use crate::utils_web::network::{get_stored_network_id, save_network_id, toggle_network, NetworkId};
 use dioxus::prelude::*;
 use web_sys::console;
 // =========================================

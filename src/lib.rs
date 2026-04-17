@@ -15,6 +15,8 @@ pub mod components {
     pub mod widgets;
 }
 pub mod utils;
+pub mod utils_web;
+pub mod utils_iced;
 pub mod icons;
 pub mod iced_pages;
 pub mod iced_components;

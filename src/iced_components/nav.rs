@@ -7,7 +7,7 @@ use crate::iced_components::SearchBar;
 use crate::iced_components::search_bar::SearchBarState;
 use crate::iced_components::button::network_toggle;
 use crate::iced_components::button::NetworkButtonState;
-use crate::utils::network::NetworkId;
+use crate::utils_iced::network::NetworkId;
 use iced::{Color, Element, Length};
 use iced::alignment::Vertical;
 use iced_widget::{container, row, text::Text, Container, Row, Space};

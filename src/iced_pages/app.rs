@@ -8,7 +8,7 @@ use crate::api::types::{
 use crate::iced_components::nav::NavbarState;
 use crate::iced_components::search_bar::SearchBarState;
 use crate::utils::format::{format_gas_amount, format_time_ago, truncate_middle};
-use crate::utils::network::NetworkId;
+use crate::utils_iced::network::NetworkId;
 use crate::utils::parse_transaction::{parse_transaction, ParsedTx};
 use std::collections::HashMap;
 
