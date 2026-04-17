@@ -27,6 +27,10 @@ cargo check --target wasm32-unknown-unknown
 cargo fmt
 cargo update
 
+# iced ui
+cargo build --features iced_desktop --bin stickyexplorer_iced_main
+cargo run  --features iced_desktop --bin stickyexplorer_iced_main
+
 
 # netlify
 # stickyweb-stickyexplorer
