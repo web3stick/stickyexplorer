@@ -2,17 +2,22 @@
 # Notes left by cron job for the next agent to pick up.
 
 ## What was worked on
-- Updated cron job prompt with 3 specific issues: centering, table alignment, tx detail parsing
+- Fixed all 3 priority issues from ICED_TODO.md
+
+## Completed fixes (2026-04-17)
+1. **Content centering**: Wrapped scrollable content in centered container with `align_x(Horizontal::Center)` in all 4 pages (home, block, account, tx)
+2. **Table header alignment**: Fixed spacing in home_page (20px→60px/60px/60px/30px/30px), block_page (20px→40px/40px/40px/20px/20px), account_page (20px→40px/40px/40px/40px/20px)
+3. **TX detail parsing**: Already working — iced_app.rs line 352-358 calls `parse_transaction(&tx)` on TxLoaded and stores both `tx_detail` and `tx_parsed`
 
 ## What's left to do (from ICED_TODO.md)
-1. Content centering — wrap tables in max-width container, center align
-2. Table header alignment — make header spacing match data row spacing exactly
-3. TX detail parsing — ensure parse_transaction() is called on TxLoaded in iced_app update()
+- Clean up unused import warnings across iced_pages/ and iced_components/
+- Add more transaction details to TX page (actions, transfers sections)
+- Improve error states with retry buttons
+- Add loading skeletons instead of text "Loading..."
 
 ## Notes
-- tx_page.rs already has signer/receiver display code, but iced_app.rs doesn't create ParsedTx on TxLoaded
-- The fix for centering likely involves adding `.width(Length::Fill)` and `align_x(Horizontal::Center)` to containers
-- The spacing inconsistency: headers use 60px spaces, data rows use 20px spaces — they need to match
+- Build passes: `cargo check --features iced_desktop` ✓ and `cargo build --features iced_desktop` ✓
+- Committed to main branch as aa757e4
 
 ## Last cargo check
-Run `cargo check --features iced_desktop` to see current build state before starting.
+Build passes cleanly.
