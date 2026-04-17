@@ -4,8 +4,8 @@
 // =========================================
 //
 // Build and run with:
-//   cargo build --features iced_desktop --bin stickyexplorer_iced_main
-//   cargo run  --features iced_desktop --bin stickyexplorer_iced_main
+//   cargo build --no-default-features --features iced_desktop --bin stickyexplorer_iced_main
+//   cargo run  --no-default-features --features iced_desktop --bin stickyexplorer_iced_main
 //
 // Note: This binary uses the existing API client, types, and utility functions
 // from the stickyexplorer crate (src/utils/, src/api/, etc.) without any
