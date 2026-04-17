@@ -1,6 +1,7 @@
 // stickyexplorer
 // =========================================
 pub mod api;
+#[cfg(feature = "web")]
 pub mod pages {
     pub mod page_account_detail;
     pub mod page_block_detail;
@@ -8,6 +9,7 @@ pub mod pages {
     pub mod page_tx_detail;
     pub mod route;
 }
+#[cfg(feature = "web")]
 pub mod components {
     pub mod button_network;
     pub mod search_bar;
@@ -15,6 +17,7 @@ pub mod components {
     pub mod widgets;
 }
 pub mod utils;
+#[cfg(feature = "web")]
 pub mod utils_web;
 pub mod utils_iced;
 pub mod icons;
