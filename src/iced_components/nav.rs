@@ -9,7 +9,7 @@ use crate::iced_components::search_bar::SearchBarState;
 use crate::iced_components::button::network_toggle;
 use crate::iced_components::button::NetworkButtonState;
 use crate::utils_iced::network::NetworkId;
-use iced::{Color, Element, Length};
+use iced::{Color, Length};
 use iced::alignment::Vertical;
 use iced_widget::{button, row, text::Text, Container, Space};
 
@@ -42,7 +42,7 @@ impl Navbar {
     pub fn view<'a>(
         state: &'a mut NavbarState,
         current_network: NetworkId,
-        active_page: Page,
+        _active_page: Page,
         search_value: String,
         on_search_change: fn(String) -> Message,
         on_search_submit: fn() -> Message,

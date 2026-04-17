@@ -13,12 +13,11 @@
 // =========================================
 
 use stickyexplorer::iced_pages::app::{AppState, Message};
-use iced::{application, Element, Settings, Theme};
+use iced::{application, Element, Size, Theme};
+use iced::window;
 
 fn main() -> iced::Result {
     println!("Starting StickyExplorer (Iced Desktop)...");
-
-    let settings = Settings::default();
 
     // Use a generic view function that works with any lifetime
     fn view<'a>(state: &'a AppState) -> Element<'a, Message> {
@@ -32,6 +31,9 @@ fn main() -> iced::Result {
 
     application(AppState::new, update, view)
         .theme(Theme::Dark)
-        .settings(settings)
+        .window(window::Settings {
+            min_size: Some(Size::new(900.0, 600.0)),
+            ..Default::default()
+        })
         .run()
 }

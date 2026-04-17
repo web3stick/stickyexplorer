@@ -13,6 +13,34 @@ use iced_widget::{button, container, scrollable, Text, Column, Row, Space};
 
 pub struct AccountPage;
 
+/// Create a clickable inline link using a flat button style.
+/// Uses a transparent style to look like a text link.
+fn link_text(text: String, color: Color, target: Message) -> Element<'static, Message> {
+    button(Text::new(text).size(12).color(color))
+        .padding(iced::Padding::from([0.0, 0.0]))
+        .style(move |_: &iced::Theme, _: iced_widget::button::Status| {
+            iced_widget::button::Style {
+                shadow: iced::Shadow::default(),
+                border: iced::Border::default(),
+                background: None,
+                text_color: color,
+                snap: false,
+            }
+        })
+        .on_press(target)
+        .into()
+}
+
+/// Create a clickable green hash-style link (for tx hash)
+fn tx_link(text: String, tx_hash: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.5, 0.9, 0.5), Message::NavigateTo(Page::Tx(tx_hash)))
+}
+
+/// Create a clickable blue account-style link (for signer/receiver)
+fn account_link(text: String, account_id: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.6, 0.75, 1.0), Message::NavigateTo(Page::Account(account_id)))
+}
+
 impl AccountPage {
     /// View function that takes individual state pieces instead of full AppState
     pub fn view_content(
@@ -93,8 +121,6 @@ impl AccountPage {
             let mut rows = Vec::new();
             for atx in txs {
                 let hash = &atx.transaction_hash;
-                let onclick = Message::NavigateTo(Page::Tx(hash.clone()));
-
                 let tx_hash = truncate_middle(hash, 12);
                 let time_str = format_time_ago(&atx.tx_block_timestamp);
 
@@ -121,51 +147,51 @@ impl AccountPage {
                         None => Color::from_rgb(0.5, 0.5, 0.3),
                     };
 
-                    let row = button(
-                        Row::new()
-                            .push(Text::new(tx_hash).size(12).color(Color::from_rgb(0.7, 0.95, 0.7)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(time_str).size(13).color(Color::from_rgb(0.9, 0.9, 0.95)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(signer).size(13).color(Color::from_rgb(0.9, 0.9, 0.95)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(receiver).size(13).color(Color::from_rgb(0.9, 0.9, 0.95)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(action_str).size(12).color(Color::from_rgb(0.6, 0.6, 0.8)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(status_text).size(14).color(status_color))
-                            .spacing(8)
-                            .align_y(Vertical::Center),
-                    )
-                    .width(Length::Fill)
-                    .on_press(onclick);
-                    rows.push(container(row).padding(iced::Padding::from([8.0, 12.0])));
+                    // Build row with individually clickable links
+                    let row = Row::new()
+                        .push(tx_link(tx_hash.clone(), hash.clone()))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new(time_str).size(12).color(Color::from_rgb(0.9, 0.9, 0.95)))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(account_link(signer.clone(), p.signer_id.clone()))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(account_link(receiver.clone(), p.receiver_id.clone()))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new(action_str).size(12).color(Color::from_rgb(0.6, 0.6, 0.8)))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new(status_text).size(14).color(status_color))
+                        .spacing(8)
+                        .align_y(Vertical::Center);
+                    rows.push(
+                        container(row)
+                            .padding(iced::Padding::from([8.0, 12.0])),
+                    );
                 } else {
-                    // Fallback row when parsing failed — show raw data
+                    // Fallback row when parsing failed — show raw data with clickable tx hash
                     let status_icon = if atx.is_success { "✓" } else { "✗" };
                     let status_color = if atx.is_success { Color::from_rgb(0.2, 0.8, 0.2) } else { Color::from_rgb(0.8, 0.2, 0.2) };
-                    let row = button(
-                        Row::new()
-                            .push(Text::new(tx_hash).size(12).color(Color::from_rgb(0.7, 0.95, 0.7)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(time_str).size(13).color(Color::from_rgb(0.9, 0.9, 0.95)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new("—").size(13).color(Color::from_rgb(0.5, 0.5, 0.5)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new("—").size(13).color(Color::from_rgb(0.5, 0.5, 0.5)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new("—").size(12).color(Color::from_rgb(0.5, 0.5, 0.5)))
-                            .push(Space::new().width(Length::Fixed(20.0)))
-                            .push(Text::new(status_icon).size(14).color(status_color))
-                            .spacing(8)
-                            .align_y(Vertical::Center),
-                    )
-                    .width(Length::Fill)
-                    .on_press(onclick);
-                    rows.push(container(row).padding(iced::Padding::from([8.0, 12.0])));
+
+                    let row = Row::new()
+                        .push(tx_link(tx_hash.clone(), hash.clone()))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new(time_str).size(12).color(Color::from_rgb(0.9, 0.9, 0.95)))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new("—").size(12).color(Color::from_rgb(0.5, 0.5, 0.5)))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new("—").size(12).color(Color::from_rgb(0.5, 0.5, 0.5)))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new("—").size(12).color(Color::from_rgb(0.5, 0.5, 0.5)))
+                        .push(Space::new().width(Length::Fixed(20.0)))
+                        .push(Text::new(status_icon).size(14).color(status_color))
+                        .spacing(8)
+                        .align_y(Vertical::Center);
+                    rows.push(
+                        container(row)
+                            .padding(iced::Padding::from([8.0, 12.0])),
+                    );
                 }
             }
-            
+
             for row_widget in rows {
                 col = col.push(row_widget);
             }

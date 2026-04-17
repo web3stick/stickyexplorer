@@ -3,7 +3,7 @@
 // Block detail page for Iced
 // =========================================
 use crate::iced_pages::{Message, Page};
-use crate::iced_pages::app::{heading_text, label_text, mono_text, value_text};
+use crate::iced_pages::app::{label_text, mono_text, value_text};
 use crate::api::types::BlockDetailResponse;
 use crate::utils::format::{format_gas_amount, format_time_ago, truncate_middle};
 use iced::{Color, Element, Length};
@@ -11,6 +11,39 @@ use iced::alignment::Vertical;
 use iced_widget::{button, scrollable, Column, Container, Row, Space, Text};
 
 pub struct BlockPage;
+
+/// Create a clickable inline link using a flat button style.
+/// Uses a transparent style to look like a text link.
+fn link_text(text: String, color: Color, target: Message) -> Element<'static, Message> {
+    button(Text::new(text).size(12).color(color))
+        .padding(iced::Padding::from([0.0, 0.0]))
+        .style(move |_: &iced::Theme, _: iced_widget::button::Status| {
+            iced_widget::button::Style {
+                shadow: iced::Shadow::default(),
+                border: iced::Border::default(),
+                background: None,
+                text_color: color,
+                snap: false,
+            }
+        })
+        .on_press(target)
+        .into()
+}
+
+/// Create a clickable green hash-style link (for tx hash)
+fn tx_link(text: String, tx_hash: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.5, 0.9, 0.5), Message::NavigateTo(Page::Tx(tx_hash)))
+}
+
+/// Create a clickable blue account-style link (for signer/receiver)
+fn account_link(text: String, account_id: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.6, 0.75, 1.0), Message::NavigateTo(Page::Account(account_id)))
+}
+
+/// Create a clickable block height link
+fn block_height_link(text: String, block_id: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.5, 0.9, 0.5), Message::NavigateTo(Page::Block(block_id)))
+}
 
 impl BlockPage {
     /// View function that takes individual state pieces instead of full AppState
@@ -25,7 +58,7 @@ impl BlockPage {
             let mut col = Column::new().spacing(8).padding(20);
             col = col.push(
                 Row::new()
-                    .push(heading_text("Block #"))
+                    .push(iced_widget::Text::new("Block #").size(18).color(Color::from_rgb(0.9, 0.9, 0.95)))
                     .push(mono_text(block_id))
                     .align_y(Vertical::Center),
             );
@@ -42,7 +75,7 @@ impl BlockPage {
             let mut col = Column::new().spacing(8).padding(20);
             col = col.push(
                 Row::new()
-                    .push(heading_text("Block #"))
+                    .push(iced_widget::Text::new("Block #").size(18).color(Color::from_rgb(0.9, 0.9, 0.95)))
                     .push(mono_text(block_id))
                     .align_y(Vertical::Center),
             );
@@ -59,12 +92,12 @@ impl BlockPage {
             let block = block_opt.unwrap();
             let b = block.block;
             let txs = block.block_txs.clone();
-            
+
             let mut col = Column::new().spacing(8).padding(20);
 
             col = col.push(
                 Row::new()
-                    .push(heading_text("Block #"))
+                    .push(iced_widget::Text::new("Block #").size(18).color(Color::from_rgb(0.9, 0.9, 0.95)))
                     .push(mono_text(block_id))
                     .align_y(Vertical::Center),
             );
@@ -78,7 +111,7 @@ impl BlockPage {
                 Row::new()
                     .push(label_text("Hash"))
                     .push(Space::new().width(Length::Fixed(12.0)))
-                    .push(value_text(&block_hash))
+                    .push(mono_text(&block_hash))
                     .spacing(8)
                     .align_y(Vertical::Center),
             );
@@ -100,7 +133,7 @@ impl BlockPage {
                 Row::new()
                     .push(label_text("Author"))
                     .push(Space::new().width(Length::Fixed(12.0)))
-                    .push(value_text(&block_author))
+                    .push(account_link(block_author.clone(), b.author_id.clone()))
                     .spacing(8)
                     .align_y(Vertical::Center),
             );
@@ -123,7 +156,7 @@ impl BlockPage {
                     Row::new()
                         .push(label_text("Prev Block Height"))
                         .push(Space::new().width(Length::Fixed(12.0)))
-                        .push(value_text(&prev_str))
+                        .push(block_height_link(prev_str.clone(), prev_h.to_string()))
                         .spacing(8)
                         .align_y(Vertical::Center),
                 );
@@ -217,7 +250,7 @@ impl BlockPage {
                         .color(Color::from_rgb(0.8, 0.8, 0.9)),
                 );
                 col = col.push(Space::new().height(Length::Fixed(8.0)));
-                
+
                 // Header row
                 col = col.push(
                     Container::new(
@@ -246,7 +279,6 @@ impl BlockPage {
                     let is_success = tx.is_success;
                     let signer_str = truncate_middle(&tx.signer_id, 16);
                     let receiver_str = truncate_middle(&tx.receiver_id, 16);
-                    let onclick = Message::NavigateTo(Page::Tx(tx.transaction_hash.clone()));
 
                     let status_color = if is_success {
                         Color::from_rgb(0.2, 0.8, 0.2)
@@ -254,14 +286,15 @@ impl BlockPage {
                         Color::from_rgb(0.8, 0.2, 0.2)
                     };
 
+                    // Build row with individually clickable links
                     let row = Row::new()
-                        .push(mono_text(&hash_display))
+                        .push(tx_link(hash_display.clone(), tx.transaction_hash.clone()))
                         .push(Space::new().width(Length::Fixed(20.0)))
                         .push(value_text(&time_str))
                         .push(Space::new().width(Length::Fixed(20.0)))
-                        .push(value_text(&signer_str))
+                        .push(account_link(signer_str.clone(), tx.signer_id.clone()))
                         .push(Space::new().width(Length::Fixed(20.0)))
-                        .push(value_text(&receiver_str))
+                        .push(account_link(receiver_str.clone(), tx.receiver_id.clone()))
                         .push(Space::new().width(Length::Fixed(20.0)))
                         .push(mono_text(&gas_str))
                         .push(Space::new().width(Length::Fixed(20.0)))
@@ -269,12 +302,8 @@ impl BlockPage {
                         .spacing(8)
                         .align_y(Vertical::Center);
 
-                    let btn = button(row)
-                        .width(Length::Fill)
-                        .on_press(onclick);
-
                     col = col.push(
-                        Container::new(btn)
+                        Container::new(row)
                             .padding(iced::Padding::from([8.0, 12.0])),
                     );
                 }

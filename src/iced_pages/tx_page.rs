@@ -3,6 +3,7 @@
 // Transaction detail page for Iced
 // =========================================
 use crate::iced_pages::Message;
+use crate::iced_pages::Page;
 use crate::iced_pages::app::{label_text, mono_text, value_text};
 use crate::api::types::TransactionDetail;
 use crate::utils::parse_transaction::ParsedTx;
@@ -10,9 +11,37 @@ use crate::utils::format::{format_gas_amount, format_time_ago, format_near_amoun
 use crate::utils::extract_transfers::TokenType;
 use iced::{Color, Element, Length};
 use iced::alignment::Vertical;
-use iced_widget::{scrollable, Column, Container, Row, Space, Text};
+use iced_widget::{button, scrollable, Column, Container, Row, Space, Text};
 
 pub struct TxPage;
+
+/// Create a clickable inline link using a flat button style.
+/// Uses a transparent style to look like a text link.
+fn link_text(text: String, color: Color, target: Message) -> Element<'static, Message> {
+    button(Text::new(text).size(12).color(color))
+        .padding(iced::Padding::from([0.0, 0.0]))
+        .style(move |_: &iced::Theme, _: iced_widget::button::Status| {
+            iced_widget::button::Style {
+                shadow: iced::Shadow::default(),
+                border: iced::Border::default(),
+                background: None,
+                text_color: color,
+                snap: false,
+            }
+        })
+        .on_press(target)
+        .into()
+}
+
+/// Create a clickable blue account-style link (for signer/receiver)
+fn account_link(text: String, account_id: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.6, 0.75, 1.0), Message::NavigateTo(Page::Account(account_id)))
+}
+
+/// Create a clickable block height link
+fn block_link(text: String, block_id: String) -> Element<'static, Message> {
+    link_text(text, Color::from_rgb(0.5, 0.9, 0.5), Message::NavigateTo(Page::Block(block_id)))
+}
 
 impl TxPage {
     /// View function that takes individual state pieces instead of full AppState
@@ -71,7 +100,7 @@ impl TxPage {
             let time = format_time_ago(&ptx.timestamp);
             let gas_used = format_gas_amount(ptx.gas_burnt);
 
-            // Inline kv_row_mono to avoid lifetime issues
+            // Hash row
             info_col = info_col.push(
                 Row::new()
                     .push(label_text("Hash"))
@@ -80,28 +109,30 @@ impl TxPage {
                     .spacing(8)
                     .align_y(Vertical::Center),
             );
-            // Inline kv_row
+            // Signer row with clickable link
             info_col = info_col.push(
                 Row::new()
                     .push(label_text("Signer"))
                     .push(Space::new().width(Length::Fixed(12.0)))
-                    .push(value_text(&signer))
+                    .push(account_link(signer.clone(), ptx.signer_id.clone()))
                     .spacing(8)
                     .align_y(Vertical::Center),
             );
+            // Receiver row with clickable link
             info_col = info_col.push(
                 Row::new()
                     .push(label_text("Receiver"))
                     .push(Space::new().width(Length::Fixed(12.0)))
-                    .push(value_text(&receiver))
+                    .push(account_link(receiver.clone(), ptx.receiver_id.clone()))
                     .spacing(8)
                     .align_y(Vertical::Center),
             );
+            // Block row with clickable link
             info_col = info_col.push(
                 Row::new()
                     .push(label_text("Block"))
                     .push(Space::new().width(Length::Fixed(12.0)))
-                    .push(value_text(&block_height))
+                    .push(block_link(block_height.clone(), ptx.block_height.to_string()))
                     .spacing(8)
                     .align_y(Vertical::Center),
             );
@@ -252,9 +283,9 @@ impl TxPage {
                     receipts_col = receipts_col.push(
                         Container::new(
                             Row::new()
-                                .push(value_text(&predecessor_str))
+                                .push(account_link(predecessor_str.clone(), predecessor.clone()))
                                 .push(Text::new(" → ").color(Color::from_rgb(0.4, 0.4, 0.4)))
-                                .push(value_text(&receiver_str))
+                                .push(account_link(receiver_str.clone(), receiver.clone()))
                                 .push(Space::new().width(Length::Fixed(12.0)))
                                 .push(mono_text(&gas_str))
                                 .align_y(Vertical::Center),

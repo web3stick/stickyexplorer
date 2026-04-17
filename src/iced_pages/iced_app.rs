@@ -375,7 +375,7 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
     // Extract ALL data we need for the view FIRST, before borrowing state again
     let network = state.network;
     let current_page = state.current_page.clone();
-    let is_home = matches!(current_page, Page::Home);
+    let _is_home = matches!(current_page, Page::Home);
     
     // Clone the search value BEFORE we start building widgets
     let search_value = state.search_query.clone();
