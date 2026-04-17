@@ -434,12 +434,8 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
             )
             .padding(iced::Padding::from([0.0, 12.0])),
 
-            // Nav links
+            // Home link only
             nav_link("Home", is_home),
-            Space::new().width(Length::Fixed(8.0)),
-            nav_link("Blocks", is_block),
-            Space::new().width(Length::Fixed(8.0)),
-            nav_link("Transactions", is_tx),
 
             Space::new().width(Length::Fixed(20.0)),
 
@@ -453,7 +449,7 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
 
             Space::new().width(Length::Fixed(20.0)),
 
-            // Network toggle
+            // Network toggle (single button)
             network_toggle(
                 &state.navbar.network_buttons,
                 network,

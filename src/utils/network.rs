@@ -2,6 +2,7 @@
 // =========================================
 // Network management with auto-switching based on account suffix
 // =========================================
+#[cfg(feature = "web")]
 use dioxus::prelude::*;
 // =========================================
 
@@ -66,6 +67,14 @@ impl NetworkId {
         let detected = Self::from_account_id(account_id);
         detected != *self
     }
+
+    /// Toggle to the other network
+    pub fn other(self) -> Self {
+        match self {
+            NetworkId::Mainnet => NetworkId::Testnet,
+            NetworkId::Testnet => NetworkId::Mainnet,
+        }
+    }
 }
 
 impl std::fmt::Display for NetworkId {
@@ -75,6 +84,7 @@ impl std::fmt::Display for NetworkId {
 }
 
 /// Get the stored network ID from localStorage
+#[cfg(feature = "web")]
 pub fn get_stored_network_id() -> NetworkId {
     get_web_storage()
         .and_then(|storage| storage.get_item(NETWORK_STORAGE_KEY).ok())
@@ -84,6 +94,7 @@ pub fn get_stored_network_id() -> NetworkId {
 }
 
 /// Save the network ID to localStorage
+#[cfg(feature = "web")]
 pub fn save_network_id(network_id: NetworkId) -> Result<(), wasm_bindgen::JsValue> {
     if let Some(storage) = get_web_storage() {
         storage.set_item(NETWORK_STORAGE_KEY, network_id.as_str())?;
@@ -92,6 +103,7 @@ pub fn save_network_id(network_id: NetworkId) -> Result<(), wasm_bindgen::JsValu
 }
 
 /// Get the web localStorage
+#[cfg(feature = "web")]
 fn get_web_storage() -> Option<web_sys::Storage> {
     web_sys::window()
         .and_then(|window| window.local_storage().ok())
@@ -101,6 +113,7 @@ fn get_web_storage() -> Option<web_sys::Storage> {
 /// Save the network ID to localStorage
 ///
 /// This should be used in a `use_effect` hook to load the stored network ID
+#[cfg(feature = "web")]
 pub fn use_network_state() -> Signal<NetworkId> {
     let mut network_id = use_signal(|| NetworkId::Mainnet);
 
@@ -121,6 +134,7 @@ pub fn toggle_network(current: NetworkId) -> NetworkId {
 
 /// Switch to network based on account ID
 /// Returns the new network ID and whether a switch occurred
+#[cfg(feature = "web")]
 pub fn switch_network_for_account(current: NetworkId, account_id: &str) -> (NetworkId, bool) {
     let detected = NetworkId::from_account_id(account_id);
     let switched = detected != current;

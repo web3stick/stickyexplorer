@@ -56,31 +56,13 @@ pub fn network_toggle(
     current_network: NetworkId,
     on_select: fn(NetworkId) -> Message,
 ) -> Element<'static, Message> {
-    let is_mainnet = current_network == NetworkId::Mainnet;
-
-    let mainnet_text = if is_mainnet {
-        Text::new("🟢 Mainnet").color(Color::from_rgb(0.2, 0.8, 0.2))
-    } else {
-        Text::new("Mainnet")
+    let (label, color) = match current_network {
+        NetworkId::Mainnet => ("Mainnet", Color::from_rgb(0.2, 0.8, 0.2)),
+        NetworkId::Testnet => ("Testnet", Color::from_rgb(0.2, 0.8, 0.2)),
     };
 
-    let testnet_text = if !is_mainnet {
-        Text::new("🟢 Testnet").color(Color::from_rgb(0.2, 0.8, 0.2))
-    } else {
-        Text::new("Testnet")
-    };
-
-    Row::new()
-        .push(
-            Button::new(mainnet_text)
-                .padding(iced::Padding::from([4.0, 12.0]))
-                .on_press(on_select(NetworkId::Mainnet)),
-        )
-        .push(
-            Button::new(testnet_text)
-                .padding(iced::Padding::from([4.0, 12.0]))
-                .on_press(on_select(NetworkId::Testnet)),
-        )
-        .spacing(8)
+    Button::new(Text::new(label).color(color))
+        .padding(iced::Padding::from([4.0, 12.0]))
+        .on_press(on_select(current_network.other()))
         .into()
 }
