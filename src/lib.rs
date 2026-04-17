@@ -16,4 +16,6 @@ pub mod components {
 }
 pub mod utils;
 pub mod icons;
+pub mod iced_pages;
+pub mod iced_components;
 // =========================================

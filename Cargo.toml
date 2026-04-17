@@ -16,10 +16,18 @@ web-sys = { version = "0.3.95", features = ["Crypto", "SubtleCrypto", "Window", 
 chrono = { version = "0.4", default-features = false, features = ["std", "now", "wasmbind"] }
 gloo-timers = { version = "0.3", features = ["futures"] }
 base64 = "0.22"
+
+# Iced desktop UI
+iced = { version = "0.14.0", default-features = false, features = ["lazy", "tokio", "wgpu", "x11"] }
+iced_widget = { version = "0.14.0" }
+tokio = { version = "1", features = ["full"] }
+url = "2"
+
 # ===========================================
 [features]
 default = ["web"]
 web = ["dioxus/web", "reqwest/default-tls"]
-desktop = ["dioxus/desktop", "reqwest/default-tls"]
+desktop = ["dioxus/desktop", "iced/wgpu", "reqwest/default-tls"]
+iced_desktop = ["iced/wgpu", "iced/x11"]
 mobile = ["dioxus/mobile", "reqwest/default-tls"]
 # ===========================================

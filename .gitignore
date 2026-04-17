@@ -8,3 +8,5 @@
 
 # Local Netlify folder
 .netlify
+
+fix_iced.py
