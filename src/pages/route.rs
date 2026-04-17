@@ -6,7 +6,7 @@ use crate::components::button_network::button_network;
 use crate::components::search_bar::search_bar;
 use crate::icons::lucide::{Moon, Sun};
 use crate::icons::Icon;
-use crate::logic::network::NetworkId;
+use crate::utils::network::NetworkId;
 use crate::pages::page_account_detail::AccountDetail;
 use crate::pages::page_block_detail::BlockDetail;
 use crate::pages::page_home::Home as HomePage;

@@ -2,13 +2,13 @@ use dioxus::prelude::*;
 use stickyexplorer::pages::route::Route;
 // =========================================
 const FAVICON: Asset = asset!("/assets/web_icon.svg");
-const MAIN_CSS: Asset = asset!("/assets/css/main.css");
-const NAVBAR_CSS: Asset = asset!("/assets/css/components_navbar.css");
-const SEARCH_CSS: Asset = asset!("/assets/css/components_search.css");
-const HOME_CSS: Asset = asset!("/assets/css/page_home.css");
-const DETAIL_CSS: Asset = asset!("/assets/css/page_detail.css");
-const FOOTER_CSS: Asset = asset!("/assets/css/footer.css");
-const BUTTON_CSS: Asset = asset!("/assets/css/button.css");
+const MAIN_CSS: Asset = asset!("/css/main.css");
+const NAVBAR_CSS: Asset = asset!("/css/components_navbar.css");
+const SEARCH_CSS: Asset = asset!("/css/components_search.css");
+const HOME_CSS: Asset = asset!("/css/page_home.css");
+const DETAIL_CSS: Asset = asset!("/css/page_detail.css");
+const FOOTER_CSS: Asset = asset!("/css/footer.css");
+const BUTTON_CSS: Asset = asset!("/css/button.css");
 // =========================================
 fn main() {
     dioxus::launch(App);
