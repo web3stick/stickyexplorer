@@ -13,9 +13,15 @@
    - `iced_pages/account_page.rs` (line ~222)
    - Note: previously `max_width(Length::Fixed(1200.0))` was tried — wrong type. Correct is `max_width(1200.0)` (f32 pixels).
 
+2. **Content filling full width**: Added `.width(Length::Fill)` to all section containers in tx_page:
+   - info_col container
+   - actions_col container
+   - transfers_col container
+   - receipts_col container
+
+3. **JSON preview toggle**: Added `ToggleJson` message + `tx_show_json` state + button in tx_page to show/hide pretty-printed TransactionDetail JSON
+
 ## What's left to do
-- [ ] **Content not filling full width (root cause)**: Web tx page wraps each section in a full-width styled box (`.detail-card` etc). Iced tx page has no such containers — it's just a loose Column of items. Fix: wrap each section (info card, actions, transfers, receipts) in `Container::new(content).width(Length::Fill)` so sections are visually full-width boxes like the web version. Inner text can still be left-aligned.
-- [ ] **JSON preview toggle on TX page**: Add `ToggleJson` variant to `Message` enum, `show_json: bool` to `AppState`, toggle button in tx_page, collapse/expand raw JSON
 - [ ] Clean up unused import warnings across iced_pages/ and iced_components/
 - [ ] Add more transaction details to TX page (actions, transfers sections)
 - [ ] Improve error states with retry buttons

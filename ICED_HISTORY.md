@@ -11,6 +11,13 @@
 - Fixed account_page table: data row spacing now matches header (40px/40px/40px/40px/20px)
 - Note: Issue 3 (TX detail parsing) was already fixed in prior code — iced_app.rs already calls parse_transaction() on TxLoaded
 
+### commit 01e69d4 (2026-04-17 evening)
+- iced: add tx JSON preview toggle and fix block_page centering
+- Add ToggleJson message and tx_show_json state for collapsing/expanding raw JSON
+- Fix block_page.rs: add missing max_width(1200.0) to outer container
+- Fix tx_page.rs: add width(Length::Fill) to all section containers (info, actions, transfers, receipts)
+- JSON preview shows pretty-printed TransactionDetail with ▶/▼ toggle button
+
 ### commit 6b4aeab (and prior)
 - Fixed `web_sys::console::log_*` panic on desktop — wrapped behind `#[cfg(feature = "logging")]`
 - Removed redundant nav links (Blocks/Transactions pointed to Home)
