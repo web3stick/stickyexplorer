@@ -44,6 +44,7 @@ pub enum Message {
     LoadTx(String),
     TxLoaded(TransactionDetail),
     TxLoadFailed(String),
+    ToggleJson,
     // Tick (for time updates)
     Tick,
 }
@@ -113,6 +114,7 @@ pub struct AppState {
     pub tx_parsed: Option<ParsedTx>,
     pub tx_loading: bool,
     pub tx_error: Option<String>,
+    pub tx_show_json: bool,
 
     // UI state
     pub navbar: NavbarState,
@@ -149,6 +151,7 @@ impl AppState {
             tx_parsed: None,
             tx_loading: false,
             tx_error: None,
+            tx_show_json: false,
             navbar: NavbarState::new(),
             search: SearchBarState::new(),
         };

@@ -51,6 +51,7 @@ impl TxPage {
         error: Option<String>,
         tx_opt: Option<TransactionDetail>,
         parsed_opt: Option<ParsedTx>,
+        show_json: bool,
     ) -> Element<'static, Message> {
         // Build the result piece by piece
         let inner = if let Some(err) = error {
@@ -170,7 +171,11 @@ impl TxPage {
                     .size(20)
                     .color(Color::from_rgb(0.9, 0.9, 0.95)),
             );
-            col = col.push(Container::new(info_col).padding(16));
+            col = col.push(
+                Container::new(info_col)
+                    .width(Length::Fill)
+                    .padding(16),
+            );
 
             // Actions
             if !ptx.actions.is_empty() {
@@ -200,7 +205,7 @@ impl TxPage {
                         .padding(iced::Padding::from([4.0, 8.0])),
                     );
                 }
-                col = col.push(Container::new(actions_col).padding(12));
+                col = col.push(Container::new(actions_col).width(Length::Fill).padding(12));
             }
 
             // Transfers
@@ -258,7 +263,7 @@ impl TxPage {
                     );
                 }
 
-                col = col.push(Container::new(transfers_col).padding(12));
+                col = col.push(Container::new(transfers_col).width(Length::Fill).padding(12));
             }
 
             // Receipts
@@ -294,7 +299,33 @@ impl TxPage {
                     );
                 }
 
-                col = col.push(Container::new(receipts_col).padding(12));
+                col = col.push(Container::new(receipts_col).width(Length::Fill).padding(12));
+            }
+
+            // JSON toggle
+            col = col.push(Space::new().height(Length::Fixed(12.0)));
+            let toggle_label = if show_json { "▼ RAW JSON" } else { "▶ RAW JSON" };
+            col = col.push(
+                Container::new(
+                    button(Text::new(toggle_label).size(12).color(Color::from_rgb(0.6, 0.7, 0.9)))
+                        .padding(iced::Padding::from([4.0, 8.0]))
+                        .on_press(Message::ToggleJson),
+                )
+                .width(Length::Fill),
+            );
+            if show_json {
+                if let Some(tx_detail) = tx_opt {
+                    let json_str = serde_json::to_string_pretty(&tx_detail).unwrap_or_else(|_| "{}".to_string());
+                    col = col.push(
+                        Container::new(
+                            Text::new(json_str)
+                                .size(11)
+                                .color(Color::from_rgb(0.6, 0.6, 0.7)),
+                        )
+                        .width(Length::Fill)
+                        .padding(12),
+                    );
+                }
             }
 
             col

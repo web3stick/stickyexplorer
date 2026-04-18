@@ -318,6 +318,7 @@ impl BlockPage {
                 .height(Length::Fill),
         )
         .width(Length::Fill)
+        .max_width(1200.0)
         .align_x(Horizontal::Center)
         .into()
     }

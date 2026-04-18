@@ -363,6 +363,11 @@ pub fn update(msg: Message, state: &mut AppState) -> Task<Message> {
             Task::none()
         }
 
+        Message::ToggleJson => {
+            state.tx_show_json = !state.tx_show_json;
+            Task::none()
+        }
+
         Message::Tick => Task::none(),
     }
 }
@@ -402,6 +407,7 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
     let tx_error = state.tx_error.clone();
     let tx_detail = state.tx_detail.clone();
     let tx_parsed = state.tx_parsed.clone();
+    let tx_show_json = state.tx_show_json;
     
     // Get page content - now we can use the cloned data without borrow conflicts
     let content = match &current_page {
@@ -415,7 +421,7 @@ pub fn view<'a>(state: &AppState) -> Element<'a, Message> {
             BlockPage::view_content(id, block_loading, block_error, block_detail)
         }
         Page::Tx(id) => {
-            TxPage::view_content(id, tx_loading, tx_error, tx_detail, tx_parsed)
+            TxPage::view_content(id, tx_loading, tx_error, tx_detail, tx_parsed, tx_show_json)
         }
     };
 
